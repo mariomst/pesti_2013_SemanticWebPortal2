@@ -1,0 +1,124 @@
+.header
+{
+    background-color:#A8A8A8;
+    border:1px solid black;
+}
+
+.header_menu
+{
+    background-color:#000000;
+    border:1px solid black;
+}
+
+h1
+{
+    font-family:"Times New Roman";
+    margin-left:2em;
+    margin-bottom:0px;
+}
+
+.link_menu:link,.link_menu:visited
+{
+    display:inline-block;
+    border:1px solid black;
+    font-weight:bold;
+    color:#000000;
+    background-color:#A8A8A8;
+    width:200px;
+    text-align:center;
+    padding:2px;
+    text-decoration:none;
+    
+}
+.link_menu:hover,.link_menu:active
+{
+    background-color:#FFFFFF;
+    color:#000000;
+}
+
+.menu
+{
+    width:15%;
+    height:100%;
+    background-color:#A8A8A8;
+    float:left;
+    border:1px solid black;
+    margin-right:2em;
+    padding-right:2em;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+
+.content
+{
+    margin-top:10px;
+    margin-left:10px;
+    float:right;
+	width:75%;
+    height:98%;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+
+.about
+{
+    height:100%;
+}
+
+.footer
+{
+    clear:both;
+    background-color:#A8A8A8;
+    border:1px solid black;
+}
+
+.highlight 
+{
+    color: #003399;
+    font-weight: bold;
+}
+
+.forms
+{
+	border:2px solid #a1a1a1;
+	padding:10px 40px; 
+	background:#dddddd;
+	width:500px;
+	border-radius:25px;
+	box-shadow: 10px 10px 5px #888888;
+  	margin-left: auto ;
+  	margin-right: auto ;
+}
+
+.error_textbox
+{
+    background-color:#CC6633;
+}
+
+.propTypeDiv
+{
+	border:1px solid black;
+	margin-top:1em;
+	background-color:#FFFFFF
+}
+
+strong
+{
+    margin-right:2em;
+}
+
+body
+{
+    width:99%;
+    height:99%;
+}
+
+span:hover
+{
+    color: #CC6600;
+}
+
+table 
+{
+  border-spacing: 5px;
+}
