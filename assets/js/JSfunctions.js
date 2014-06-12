@@ -2,30 +2,32 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.0
+ * Versão 2.2
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
- * - Marta Sofia     1100640     1100640@isep.ipp.pt
+ * - Marta Graça     1100640     1100640@isep.ipp.pt
  *
  * Funções
- * - XMLHttpObject           (Linha 35)      Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
- * - requestInformation      (linha 51)      Envia o pedido http ao controller e retorna o resultado do XSLT.
- * - selectedElement         (linha 76)      Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
- * - cleanDIV                (linha 96)      Apenas faz limpeza da informação contida numa DIV.
- * - constructClassTree      (linha 104)     Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
- * - getSubClasses           (linha 115)     Recebe como parâmetro o nome da classe, faz um pedido de pesquisa de todas as subclasses pertencentes a ela e retorna o resultado em forma de lista.
- * - removeSpaces            (linha 131)     Remove todos os espaços que possam existir na variável. 
- * - highlightElement        (linha 139)     Ilumina o elemento da árvore de classes escolhido.
- * - consultMember           (linha 145)     Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
- * - consultClass            (linha 171)     Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
- * - appendMembers           (linha 205)     Adiciona a div de conteúdo os membros pertencentes à classe.
- * - appendSubClasses        (linha 217)     Adiciona a div de conteúdo as subclasses pertencentes à classe.
- * - appendProperties        (linha 229)     Adiciona a div de conteúdo as propriedades associadas à classe.
- * - deleteMember            (linha 251)     Elimina membros usando query simples.
- * - callFunctionsFromLink   (linha 264)     Chama funcionalidades JS apartir de certos links existentes na página.
- * - createModalWindow       (linha 293)     Chama as funcionalidades do nyroModal para criação de uma janela modal.
- * - createModelessWindow    (linha 328)     Chama as funcionalidades do nyroModal para criação de uma janela modeless.
+ * - XMLHttpObject                Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+ * - requestInformation           Envia o pedido http ao controller e retorna o resultado do XSLT.
+ * - selectedElement              Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
+ * - cleanDIV                     Apenas faz limpeza da informação contida numa DIV.
+ * - constructClassTree           Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
+ * - getSubClasses                Recebe como parâmetro o nome da classe, faz um pedido de pesquisa de todas as subclasses pertencentes a ela e retorna o resultado em forma de lista.
+ * - removeSpaces                 Remove todos os espaços que possam existir na variável. 
+ * - highlightElement             Ilumina o elemento da árvore de classes escolhido.
+ * - elementVisibility            Esconde ou mostra um elemento da árvore de classes.
+ * - consultMember                Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
+ * - consultClass                 Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
+ * - appendMembers                Adiciona a div de conteúdo os membros pertencentes à classe.
+ * - appendSubClasses             Adiciona a div de conteúdo as subclasses pertencentes à classe.
+ * - appendProperties             Adiciona a div de conteúdo as propriedades associadas à classe.
+ * - deleteMember                 Elimina membros usando query simples.
+ * - deleteComment                Elimina o comentário do elemento indicado.
+ * - callFunctionsFromLink        Chama funcionalidades JS apartir de certos links existentes na página.
+ * - createModalWindow            Chama as funcionalidades do nyroModal para criação de uma janela modal.
+ * - createModelessWindow         Chama as funcionalidades do nyroModal para criação de uma janela modeless.
  */
 
 //Variaveis Globais:
@@ -38,11 +40,13 @@ function XMLHttpObject()
 
     if (window.XMLHttpRequest)
     {
-        obj = new XMLHttpRequest();                         //para browsers modernos. 
+        //Para browsers modernos. 
+        obj = new XMLHttpRequest();
     }
     else
     {
-        obj = new ActiveXObject("Microsoft.XMLHTTP");       //para versões antigas do Internet Explorer (IE5 e IE6).
+        //Para versões antigas do Internet Explorer (IE5 e IE6).
+        obj = new ActiveXObject("Microsoft.XMLHTTP");
     }
 
     return obj;
@@ -75,20 +79,28 @@ function requestInformation(obj, url)
 
 function selectedElement(target)
 {
-    var nrElements = $(target).parent().find('li').length;     //obtem o nr de filhos (subclasses) que a classe tem na lista;
+    //Obtêm o nr de filhos (subclasses) que a classe tem na lista;
+    var nrElements = $(target).parent().find('li').length;
+    //Fica apontar para a DIV de conteúdo
     var divContent = document.getElementById("content");
-    var classLabel = removeSpaces(target);                      //Remove a URI e retorna apenas o nome da classe / indivíduo.
+    //Remove espaços que possam existir na variavel recebida
+    var classLabel = removeSpaces(target);
 
-    highlightElement(target);                                   //Ilumina o elemento da árvore escolhido.
-    cleanDIV(divContent);                                       //Apenas faz limpeza da informação contida na DIV de conteúdo.    
-    consultClass(classLabel);                                   //Faz um pedido para obter informações sobre a classe escolhida.
+    //Ilumina o elemento da árvore escolhido.
+    highlightElement(target);
+    //Apenas faz limpeza da informação contida na DIV de conteúdo.
+    cleanDIV(divContent);
+    //Faz um pedido para obter informações sobre a classe escolhida.
+    consultClass(classLabel);
 
     if (nrElements == 0)
     {
-        getSubClasses(target);                                  //Faz um pedido para obter (se existirem) as subclasses da class escolhida.
+        //Faz um pedido para obter (se existirem) as subclasses da class escolhida.
+        getSubClasses(target);
     }
     else
     {
+        //Remove todos os filhos (subclasses) da classe escolhida da árvore.
         $(target).parent().find('ul').remove();
     }
 }
@@ -103,50 +115,68 @@ function cleanDIV(target)
 
 function constructClassTree(target)
 {
-    obj = XMLHttpObject();                                  //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.  
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
+    obj = XMLHttpObject();
 
-    url_Classes = "/index.php/listClasses";                 //url da função existente no Controller. 
+    //URL da função existente no Controller. 
+    url_Classes = "/index.php/listClasses";
 
-    result = requestInformation(obj, url_Classes);          //chama a função que faz um pedido "get" ao servidor e recebe o resultado.
+    //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
+    result = requestInformation(obj, url_Classes);
 
-    $(target).append(result);                               //faz append do resultado html na DIV indicada.
+    //Faz append do resultado html na DIV indicada.
+    $(target).append(result);
 }
 
 function getSubClasses(parentClass)
 {
-    obj = XMLHttpObject();                                  //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
-    url_subClasses = "/index.php/listSubClasses/";          //url do método existente no Controller. 
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    obj = XMLHttpObject();
 
-    classLabel = removeSpaces(parentClass);                 //Remove os espaços.
+    //URL do método existente no Controller. 
+    url_subClasses = "/index.php/listSubClasses/";
 
-    url_subClasses = url_subClasses + classLabel;           //adiciona ao url, a classe a ser feita a pesquisa de subClasses.
+    //Remove os espaços.
+    classLabel = removeSpaces(parentClass);
 
-    result = requestInformation(obj, url_subClasses);       //chama o método que faz um pedido "get" ao servidor e recebe o resultado.
+    //Adiciona ao URL, a classe a ser feita a pesquisa de subClasses.
+    url_subClasses = url_subClasses + classLabel;
 
-    parentID = $(parentClass).parent().attr('id');			//busca o ID do pai da classe para adicionar a informação na página.
+    //Chama o método que faz um pedido "get" ao servidor e recebe o resultado.
+    result = requestInformation(obj, url_subClasses);
 
-    $('#' + parentID).append(result);						//faz append no elemento que tenha o ID obtido na linha anterior.
+    //Busca o ID do pai da classe para adicionar a informação na página.
+    parentID = $(parentClass).parent().attr('id');
+
+    //Faz append no elemento que tenha o ID obtido na linha anterior.
+    $('#' + parentID).append(result);
 }
 
 function removeSpaces(parentClass)
 {
-    classURI = $(parentClass).text();                        //recebe o texto dentro do elemento da lista.
-    classLabel = classURI.replace(/\s/g, "");                 //remove todos os espaços que possam estar presentes.
+    //Recebe o texto dentro do elemento da lista.
+    classURI = $(parentClass).text();
+    //Remove todos os espaços que possam estar presentes.
+    classLabel = classURI.replace(/\s/g, "");
 
     return classLabel;
 }
 
 function highlightElement(target)
 {
-    $('.highlight').removeClass('highlight');               //remove o highlight da classe que previamente estava selecionada.
-    $(target).addClass('highlight');                        //adiciona ao target a classe highlight, ao ser adicionado o CSS adapta o efeito.
+    //Remove o highlight da classe que previamente estava selecionada.
+    $('.highlight').removeClass('highlight');
+    //Adiciona ao target a classe highlight, ao ser adicionado o CSS adapta o efeito.
+    $(target).addClass('highlight');
 }
 
 function elementVisibility(button)
 {
+    //Obtêm o elemento 'span' mais perto do botão.
     var listElement = $(button).closest('li').find('span');
-    
-    if($(listElement).is(":visible"))
+
+    //Verifica se o elemento esta ou não visível.
+    if ($(listElement).is(":visible"))
     {
         $(listElement).hide();
         $(button).find('img').attr('src', "/assets/images/eye_closed.png");
@@ -167,9 +197,12 @@ function consultMember(memberLabel)
     url_uri = "/index.php/printURI";
     url_comment = "/index.php/getComment/" + memberLabel;
 
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     obj = XMLHttpObject();
-    result_uri = requestInformation(obj, url_uri);			//obter a URI do membro seleccionado.
-    result_comment = requestInformation(obj, url_comment);  //obter o comentário do membro seleccionado.
+    //Obter a URI do membro seleccionado.
+    result_uri = requestInformation(obj, url_uri);
+    //Obter o comentário do membro seleccionado.
+    result_comment = requestInformation(obj, url_comment);
 
     //Construção da DIV de conteúdo
     $(".content").append("<h3>Informa&ccedil;&otilde;es relativa ao membro: " + memberLabel + "<h3>");
@@ -196,9 +229,12 @@ function consultClass(classLabel)
     url_uri = "/index.php/printURI";
     url_comment = "/index.php/getComment/" + classLabel;
 
-    obj = XMLHttpObject();									//Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.	
-    result_uri = requestInformation(obj, url_uri);			//obter a URI da Classe seleccionada.
-    result_comment = requestInformation(obj, url_comment);  //obter o comentário da Classe seleccionada.
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    obj = XMLHttpObject();
+    //Obter a URI da Classe seleccionada.
+    result_uri = requestInformation(obj, url_uri);
+    //Obter o comentário da Classe seleccionada.
+    result_comment = requestInformation(obj, url_comment);
 
     selectedClass = classLabel;
 
@@ -222,8 +258,10 @@ function appendMembers(obj, classLabel, url_insert_member, url_members)
 {
     $(".content").append("<b>Membros pertencentes &agrave; classe:</b>");
 
+    //Obter todos os membros da classe seleccionada.
     result_members = requestInformation(obj, url_members);
 
+    //Adição dos resultado na DIV
     $(".content").append(result_members);
 
     $(".content").append("&#8594; Para adicionar um novo membro, clique no bot&atildeo ");
@@ -234,8 +272,10 @@ function appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses)
 {
     $(".content").append("<br><br><b>SubClasses pertencentes &agrave; classe:</b>");
 
+    //Obter todos as subclasses da classe seleccionada.
     result_subclasses = requestInformation(obj, url_subclasses);
 
+    //Adição dos resultado na DIV
     $(".content").append(result_subclasses);
 
     $(".content").append("&#8594; Para adicionar uma nova subclasse da classe " + classLabel + ", clique no bot&atildeo ");
@@ -267,13 +307,51 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
 function deleteMember(memberLabel, classLabel)
 {
     //Variáveis utilizadas
-    var url_deleteMember = "/index.php/deleteData/membro/" + memberLabel + "/" + classLabel;
-    var divCont = document.getElementById("content");
+    url_deleteMember = "/index.php/deleteData/membro/" + memberLabel + "/" + classLabel;
+    divCont = document.getElementById("content");
+
+    deleteComment(memberLabel);
 
     $.post(url_deleteMember, function(result)
     {
-        cleanDIV(divCont);
-        consultClass(classLabel);
+        //Se a eliminação do membro for bem sucedida.
+        if (result == 1)
+        {
+            //Eliminação do comentário associado ao membro.
+            deleteComment(memberLabel);
+            //Atualização da div de conteúdo.
+            cleanDIV(divCont);
+            consultClass(classLabel);
+        }
+        else
+        {
+            alert("Erro: Eliminacao sem sucesso...");
+            //Atualização da div de conteúdo.
+            cleanDIV(divCont);
+            consultClass(classLabel);
+        }
+    });
+}
+
+function deleteComment(element)
+{
+    //Variáveis utilizadas
+    url_deleteComment = "/index.php/deleteData/comentario/" + element + "/";
+    url_comment = "/index.php/getComment/" + element;
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    obj = XMLHttpObject();
+
+    //Obter o comentário (se existir) do elemento indicado.
+    comment = requestInformation(obj, url_comment);
+    convertString = $('<div>').html(comment).text();
+
+    url_deleteComment = url_deleteComment + "\"" + convertString + "\"";
+
+    //Eliminação do comentário.
+    $.post(url_deleteComment, function(result)
+    {
+        return(result);
     });
 }
 
@@ -281,14 +359,22 @@ function callFunctionsFromLink(label, chamada)
 {
     var divContent = document.getElementById("content");
 
-    cleanDIV(divContent);
+    /*
+     * Descrição das chamadas:
+     * 1 - consulta de uma Classe.
+     * 2 - consulta de um Membro.
+     * 3 - eliminação de uma Classe.
+     * 4 - eliminação de um Membro.
+     */
 
     if (chamada == "1")
     {
+        cleanDIV(divContent);
         consultClass(label);
     }
     else if (chamada == "2")
     {
+        cleanDIV(divContent);
         consultMember(label);
     }
     else if (chamada == "3")
@@ -323,10 +409,10 @@ function createModalWindow(url, classParent, chamada)
                         var divCont = document.getElementById("content");
                         var divMenu = document.getElementById("menu");
                         var element = $(".highlight").get();
-                        //actualizar a árvore de classes:
+                        //Actualizar a árvore de classes:
                         $(element).parent().find('ul').remove();
                         getSubClasses(element);
-                        //actualizar a página de consulta:                           
+                        //Actualizar a página de consulta:                           
                         cleanDIV(divCont);
                         if (chamada == 1)
                         {
@@ -363,5 +449,5 @@ function createModelessWindow(url)
 
 function testes()
 {
-    alert("Info: Ainda nao desenvolvido...");
+    alert("Info: Ainda em fase de testes...");
 }
