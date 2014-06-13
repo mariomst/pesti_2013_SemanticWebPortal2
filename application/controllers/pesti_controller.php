@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 2.4
+ * Versão 2.5
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -25,26 +25,29 @@
  * 2.2 -> atualização do insertData, adicionado a inserção de comentários nas classes e membros da ontologia.
  * 2.3 -> adição da função deleteData, descrição da função indicada em baixo.
  * 2.4 -> alteração da forma como as queries eram enviadas para o Model. Correcção de alguns erros.
+ * 2.5 -> adição das funções getClassProperty_M1 e getClassProperty_M2.
  *
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
- * view              -> criação da view Página Principal
- * view_insertClass  -> criação da view Inserção
- * listClasses       -> recebe um xml com as super classes existentes na ontologia e retorna uma lista.
- * listSubClasses    -> recebe um xml com as subclasses da classe indicada e retorna uma lista.
- * getSubClasses     -> recebe um xml com as subclasses da classe indicada e retorna uma tabela.
- * getMembers        -> recebe um xml com todos os membros da classe indicada.
- * getProperties		-> recebe um xml com as propriedades existentes na ontologia.
- * getPropertyRange  -> recebe um xml com o range da propriedade dada.
- * getMemberProperty -> recebe um xml com as propriedades de um determinado membro.
- * printURI			-> imprime a uri da ontolgia.
- * insertData        -> inserção de novos dados na ontologia.
- * deteleData        -> eliminação de dados da ontologia.
+ * view                     -> criação da view Página Principal
+ * view_insertClass         -> criação da view Inserção
+ * listClasses              -> recebe um xml com as super classes existentes na ontologia e retorna uma lista.
+ * listSubClasses           -> recebe um xml com as subclasses da classe indicada e retorna uma lista.
+ * getSubClasses            -> recebe um xml com as subclasses da classe indicada e retorna uma tabela.
+ * getMembers               -> recebe um xml com todos os membros da classe indicada.
+ * getProperties            -> recebe um xml com as propriedades existentes na ontologia.
+ * getPropertyRange         -> recebe um xml com o range da propriedade dada.
+ * getClassProperty_M1      -> recebe um xml com os nodos dos primeiros first e rest.
+ * getClassProperty_M2      -> recebe um xml com os nodos first e rest e analisa-os.
+ * getMemberProperty        -> recebe um xml com as propriedades de um determinado membro.
+ * printURI                 -> imprime a uri da ontolgia.
+ * insertData               -> inserção de novos dados na ontologia.
+ * deteleData               -> eliminação de dados da ontologia.
  *
  * Funções Privadas:
- * sendQuery         -> envio da query para o Fuseki (esse processo é tratado pelo modelo).
- * getURI            -> retorna de forma dinamica a uri da ontologia.
- * useXSLT           -> carrega o xsl indicado e processa à transformação do xml indicado.
+ * sendQuery                -> envio da query para o Fuseki (esse processo é tratado pelo modelo).
+ * getURI                   -> retorna de forma dinamica a uri da ontologia.
+ * useXSLT                  -> carrega o xsl indicado e processa à transformação do xml indicado.
  */
 
 //Configurações do PHP
@@ -55,6 +58,7 @@ class PESTI_Controller extends CI_Controller {
     //================= Variaveis Globais ===================//
     protected $url_db_consult = "http://localhost:3030/data/sparql";            // -> endereço do Fuseki para consultas
     protected $url_db_insert = "http://localhost:3030/data/update";             // -> endereço do Fuseki para inserções
+    protected $properties_array = array();
 
     //================= Funções Públicas ====================//	
 
@@ -401,6 +405,80 @@ class PESTI_Controller extends CI_Controller {
                 print_r($getLiteral[0]);
             }
         }
+    }
+    
+    public function getClassProperty_M1($classe)
+    {
+        /*
+         * SPARQL QUERY:
+         */
+        
+        //Obter a URI completa e adicionar a variável $classe
+        $ontologyURI = $this->getURI();
+        $fullURI = '<' . $ontologyURI . '#' . $classe . '>';
+        
+        //Construção da Query
+        $query = '';
+        
+        //Ficheiro XSL a ser usado para a transformação do XML
+        $xslfile = '';   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+
+        $result = $this->sendQuery($query, $xslfile);
+        
+        //Obter todos os <span> do resultado
+        $span = explode("<span>", $query);
+        
+        //Obter o first
+        $first_step1 = $span[1];
+        $first_step2 = explode("</span>", $first_step1);
+        
+        //Obter o rest
+        $rest_step1 = $span[2];
+        $rest_step2 = explode("</span>", $rest_step1);        
+        
+        if($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil')
+        {
+            $this->getClassProperty_M2($first_step2, $rest_step2);     
+        }
+        else
+        {
+            return $this->properties_array;
+        }
+    }
+    
+    public function getClassProperty_M2($first, $rest)
+    {
+        /*
+         * SPARQL QUERY:
+         */
+        
+        //Construção da Query para analisar o first
+        $query = '';
+        
+        //Ficheiro XSL a ser usado para a transformação do XML
+        $xslfile = '';   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+
+        $result = $this->sendQuery($query, $xslfile);
+        
+        //Obter todos os <span> do resultado
+        $span = explode("<span>", $query);
+        
+        //Obter o first
+        $first_step1 = $span[1];
+        $first_step2 = explode("</span>", $first_step1);
+        
+        //Obter o rest
+        $rest_step1 = $span[2];
+        $rest_step2 = explode("</span>", $rest_step1);        
+        
+        if($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil')
+        {
+            $this->getClassProperty_M2($first_step2, $rest_step2);     
+        }
+        else
+        {
+            return $this->properties_array;
+        }           
     }
 
     public function getMemberProperty($membro) {

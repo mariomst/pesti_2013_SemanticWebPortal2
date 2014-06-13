@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.2
+ * Versão 2.3
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -23,6 +23,7 @@
  * - appendMembers                Adiciona a div de conteúdo os membros pertencentes à classe.
  * - appendSubClasses             Adiciona a div de conteúdo as subclasses pertencentes à classe.
  * - appendProperties             Adiciona a div de conteúdo as propriedades associadas à classe.
+ * - deleteClass                  Elimina classes e respectivas associações.
  * - deleteMember                 Elimina membros usando query simples.
  * - deleteComment                Elimina o comentário do elemento indicado.
  * - callFunctionsFromLink        Chama funcionalidades JS apartir de certos links existentes na página.
@@ -302,6 +303,11 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
         $(".content").append("<br>&#8594; Para adicionar uma nova propriedade ao membro " + label + ", clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_prop, '" + label + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
     }
+}
+
+function deleteClass(classLabel)
+{
+    //Ainda não desenvolvido
 }
 
 function deleteMember(memberLabel, classLabel)
