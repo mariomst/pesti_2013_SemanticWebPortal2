@@ -305,9 +305,56 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
     }
 }
 
-function deleteClass(classLabel)
+function deleteClass(classLabel, superClassLabel)
 {
-    //Ainda não desenvolvido
+    //Variáveis utilizadas
+    url_membersList = "/index.php/getMembers/" + classLabel + "/3";
+    url_subClassesList = "/index.php/listSubClasses/" + classLabel;
+    url_deleteClass = "/index.php/deleteData/classe/" + classLabel + "/" + superClassLabel;
+    divCont = document.getElementById("content");
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    obj = XMLHttpObject();
+    //Obter a lista de subclasses da Classe seleccionada.
+    result_subClassesList = requestInformation(obj, url_subClassesList);
+    //Obter a lista de membros da Classe seleccionada.
+    result_membersList = requestInformation(obj, url_membersList);
+    //Obter o comentário da Classe seleccionada.
+    result_comment = requestInformation(obj, url_comment);
+
+    //Obter o tamanho da lista de subClasses.
+    subClassesList_length = $(result_subClassesList).find('li').length;
+    //Obter o tamanho da lista de membros.
+    membersList_length = $(result_membersList).find('li').length;
+    ;
+
+    //Verifica se existem subclasses da Classe a ser eliminada.
+    if (subClassesList_length != 0)
+    {
+        $(result_subClassesList).find('li').each(function()
+        {
+            deleteClass($(this).text(), classLabel);
+        });
+    }
+    //Verifica se existem membros da Classe a ser eliminada.
+    if (membersList_length != 0)
+    {
+        $(result_membersList).find('li').each(function()
+        {
+            deleteMember($(this).text(), classLabel);
+        });
+    }
+
+    //Apagar comentário associado a Classe
+    deleteComment(classLabel);
+
+    $.post(url_deleteClass, function(result)
+    {
+        if (result != 1)
+        {
+            alert("Erro: Eliminacao da classe sem sucesso...");
+        }
+    });
 }
 
 function deleteMember(memberLabel, classLabel)
@@ -316,8 +363,6 @@ function deleteMember(memberLabel, classLabel)
     url_deleteMember = "/index.php/deleteData/membro/" + memberLabel + "/" + classLabel;
     divCont = document.getElementById("content");
 
-    deleteComment(memberLabel);
-
     $.post(url_deleteMember, function(result)
     {
         //Se a eliminação do membro for bem sucedida.
@@ -325,16 +370,10 @@ function deleteMember(memberLabel, classLabel)
         {
             //Eliminação do comentário associado ao membro.
             deleteComment(memberLabel);
-            //Atualização da div de conteúdo.
-            cleanDIV(divCont);
-            consultClass(classLabel);
         }
         else
         {
-            alert("Erro: Eliminacao sem sucesso...");
-            //Atualização da div de conteúdo.
-            cleanDIV(divCont);
-            consultClass(classLabel);
+            alert("Erro: Eliminacao do membro sem sucesso...");
         }
     });
 }
@@ -361,6 +400,11 @@ function deleteComment(element)
     });
 }
 
+function deleteProperties(element)
+{
+    //Ainda não desenvolvido...
+}
+
 function callFunctionsFromLink(label, chamada)
 {
     var divContent = document.getElementById("content");
@@ -375,21 +419,29 @@ function callFunctionsFromLink(label, chamada)
 
     if (chamada == "1")
     {
+        //Atualização da div de conteúdo.
         cleanDIV(divContent);
         consultClass(label);
     }
     else if (chamada == "2")
     {
+        //Atualização da div de conteúdo.
         cleanDIV(divContent);
         consultMember(label);
     }
     else if (chamada == "3")
     {
-        /*Not done yet*/
+        deleteClass(label, selectedClass);
+        //Atualização da div de conteúdo.
+        cleanDIV(divCont);
+        consultClass(selectedClass);
     }
     else if (chamada == "4")
     {
         deleteMember(label, selectedClass);
+        //Atualização da div de conteúdo.
+        cleanDIV(divCont);
+        consultClass(selectedClass);
     }
     else
     {

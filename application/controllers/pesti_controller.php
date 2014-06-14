@@ -260,8 +260,10 @@ class PESTI_Controller extends CI_Controller {
         //Ficheiro XSL a ser usado para a transformação do XML
         if ($chamada == 1) {
             $xslfile = "http://localhost/assets/xsl/tabela_membros.xsl";    // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
-        } else {
+        } else if ($chamada == 2) {
             $xslfile = 'http://localhost/assets/xsl/select_membros.xsl';    // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
+        } else {
+            $xslfile = 'http://localhost/assets/xsl/lista_membros.xsl';     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
         }
 
         //Enviar a query e o ficheiro XSL para o método privado
@@ -406,79 +408,71 @@ class PESTI_Controller extends CI_Controller {
             }
         }
     }
-    
-    public function getClassProperty_M1($classe)
-    {
+
+    public function getClassProperty_M1($classe) {
         /*
          * SPARQL QUERY:
          */
-        
+
         //Obter a URI completa e adicionar a variável $classe
         $ontologyURI = $this->getURI();
         $fullURI = '<' . $ontologyURI . '#' . $classe . '>';
-        
+
         //Construção da Query
         $query = '';
-        
+
         //Ficheiro XSL a ser usado para a transformação do XML
         $xslfile = '';   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
 
         $result = $this->sendQuery($query, $xslfile);
-        
+
         //Obter todos os <span> do resultado
         $span = explode("<span>", $query);
-        
+
         //Obter o first
         $first_step1 = $span[1];
         $first_step2 = explode("</span>", $first_step1);
-        
+
         //Obter o rest
         $rest_step1 = $span[2];
-        $rest_step2 = explode("</span>", $rest_step1);        
-        
-        if($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil')
-        {
-            $this->getClassProperty_M2($first_step2, $rest_step2);     
-        }
-        else
-        {
+        $rest_step2 = explode("</span>", $rest_step1);
+
+        if ($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil') {
+            $this->getClassProperty_M2($first_step2, $rest_step2);
+        } else {
             return $this->properties_array;
         }
     }
-    
-    public function getClassProperty_M2($first, $rest)
-    {
+
+    public function getClassProperty_M2($first, $rest) {
         /*
          * SPARQL QUERY:
          */
-        
+
         //Construção da Query para analisar o first
         $query = '';
-        
+
         //Ficheiro XSL a ser usado para a transformação do XML
         $xslfile = '';   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
 
         $result = $this->sendQuery($query, $xslfile);
-        
+
         //Obter todos os <span> do resultado
         $span = explode("<span>", $query);
-        
+
         //Obter o first
         $first_step1 = $span[1];
         $first_step2 = explode("</span>", $first_step1);
-        
+
         //Obter o rest
         $rest_step1 = $span[2];
-        $rest_step2 = explode("</span>", $rest_step1);        
-        
-        if($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil')
-        {
-            $this->getClassProperty_M2($first_step2, $rest_step2);     
-        }
-        else
-        {
+        $rest_step2 = explode("</span>", $rest_step1);
+
+        if ($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil') {
+            $this->getClassProperty_M2($first_step2, $rest_step2);
+        } else {
             return $this->properties_array;
-        }           
+        }
     }
 
     public function getMemberProperty($membro) {
@@ -734,7 +728,24 @@ class PESTI_Controller extends CI_Controller {
         $subject_uri = "<" . $full_uri . '#' . $subject . ">";  // -> criação da uri com o sujeito.
         $result = false;
 
-        if ($type == 'membro') {    // -> Eliminação de um membro
+        if ($type == 'classe') {            // -> Eliminação de uma classe.
+            $object_uri = "<" . $full_uri . '#' . $object . ">";  // -> criação da uri com o objecto.
+            $predicate_uri = "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
+
+            //Primeiro Eliminar
+            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+
+            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+            $another_uri = "<http://www.w3.org/2002/07/owl#Class>";
+
+            //Segundo Eliminar
+            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $another_uri);
+
+            print_r($result);
+
+            exit;
+            
+        } else if ($type == 'membro') {    // -> Eliminação de um membro
             $object_uri = "<" . $full_uri . '#' . $object . ">";  // -> criação da uri com o objecto.
 
             $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
