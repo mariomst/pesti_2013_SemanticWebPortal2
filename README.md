@@ -5,7 +5,8 @@ This README would normally document whatever steps are necessary to get your app
 ### What is this repository for? ###
 
 * Quick summary
-* Version
++ Versão 5.7.4
+    *  Podem consultar o Changelog na [Wiki](https://bitbucket.org/mario_1090626/pesti_web_semantics_portal/wiki/Home). 
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### Como faço para configurar? ###
