@@ -25,5 +25,5 @@ This README would normally document whatever steps are necessary to get your app
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* Mário Teixeira [1090626@isep.ipp.pt](mailto:1090626@isep.ipp.pt)
+* Marta Graça [1100640@isep.ipp.pt](mailto:1100640@isep.ipp.pt)
