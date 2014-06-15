@@ -10,9 +10,10 @@ This README would normally document whatever steps are necessary to get your app
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
+* Resumo da configuração:
+* Configuração:
++ Dependências:
+    *  Para executar o Website, é necessário ter um [Servidor Fuseki](https://jena.apache.org/documentation/serving_data/) e indicar o endereço (ex: http://localhost:3030/data) no ficheiro "pesti_controller.php".
 * Database configuration
 * How to run tests
 * Deployment instructions
@@ -23,7 +24,7 @@ This README would normally document whatever steps are necessary to get your app
 * Code review
 * Other guidelines
 
-### Who do I talk to? ###
+### Quem devo falar em caso de dúvidas? ###
 
 * Mário Teixeira [1090626@isep.ipp.pt](mailto:1090626@isep.ipp.pt)
 * Marta Graça [1100640@isep.ipp.pt](mailto:1100640@isep.ipp.pt)
