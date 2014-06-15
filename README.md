@@ -13,7 +13,19 @@ This README would normally document whatever steps are necessary to get your app
 
 + Configuração:
     *  O projecto pode ser posto directamente na pasta htdocs se estiver a utilizar um [Servidor XAMPP](https://www.apachefriends.org/index.html) ou na pasta www se estiver a utilizar um [Servidor WAMP](http://www.wampserver.com/en/).
-    *  Como é utilizado o [Framework CodeIgniter](http://ellislab.com/codeigniter), caso seja necessário a alteração dos caminhos para as páginas PHP, pode ser facilmente ajustado no ficheiro "routes.php" localizado em "/application/config/".
+    *  Como é utilizado o [Framework CodeIgniter](http://ellislab.com/codeigniter), caso seja necessário a alteração dos caminhos para as páginas PHP, pode ser facilmente ajustado no ficheiro "routes.php" localizado em "/application/config/". Exemplo:
+
+```
+#!php
+
+//Páginas De Visualização
+$route['default_controller'] = 'pesti_controller/view';
+$route['login'] = 'user_controller/viewLogin';
+$route['register'] = 'user_controller/viewRegister';
+
+```
+
+
 + Dependências:
     *  Para executar o Website, é necessário ter um [Servidor Fuseki](https://jena.apache.org/documentation/serving_data/) e indicar o endereço (ex: http://localhost:3030/data) no ficheiro "pesti_controller.php".
 * How to run tests
