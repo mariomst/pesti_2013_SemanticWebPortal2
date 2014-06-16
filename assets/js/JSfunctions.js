@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.3
+ * Versão 2.4
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -432,14 +432,14 @@ function callFunctionsFromLink(label, chamada)
     {
         deleteClass(label, selectedClass);
         //Atualização da div de conteúdo.
-        cleanDIV(divCont);
+        cleanDIV(divContent);
         consultClass(selectedClass);
     }
     else if (chamada == "4")
     {
         deleteMember(label, selectedClass);
         //Atualização da div de conteúdo.
-        cleanDIV(divCont);
+        cleanDIV(divContent);
         consultClass(selectedClass);
     }
     else

@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 2.6
+ * Versão 2.7
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -27,6 +27,7 @@
  * 2.4 -> alteração da forma como as queries eram enviadas para o Model. Correcção de alguns erros.
  * 2.5 -> adição das funções getClassProperty_M1 e getClassProperty_M2.
  * 2.6 -> adição da função insertProperty.
+ * 2.7 -> alteração da estrutura, criação de algumas funções privadas, descrição indicada em baixo.
  *
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -47,7 +48,14 @@
  * deteleData               -> eliminação de dados da ontologia.
  *
  * Funções Privadas:
+ * insertNewPropertyStep1   ->
+ * insertNewPropertyStep2   -> 
+ * deleteClass              -> eliminação da classe.
+ * deleteMember             -> eliminação do membro.
+ * deleteCommentary         -> eliminação do comentário.
  * sendQuery                -> envio da query para o Fuseki (esse processo é tratado pelo modelo).
+ * sendInsert               -> envio da query de inserção para o Fuseki (esse processo é tratado pelo modelo).
+ * sendDelete               -> envio da query de eliminação para o Fuseki (esse processo é tratado pelo modelo).
  * getURI                   -> retorna de forma dinamica a uri da ontologia.
  * useXSLT                  -> carrega o xsl indicado e processa à transformação do xml indicado.
  */
@@ -429,7 +437,7 @@ class PESTI_Controller extends CI_Controller {
         $result = $this->sendQuery($query, $xslfile);
 
         //Obter todos os <span> do resultado
-        $span = explode("<span>", $query);
+        $span = explode("<span>", $result);
 
         //Obter o first
         $first_step1 = $span[1];
@@ -721,19 +729,19 @@ class PESTI_Controller extends CI_Controller {
     }
 
     public function insertProperty($type, $subject, $predicate, $object) {
-        //Variáveis utilizadas
-        $full_uri = $this->getURI();                                // -> obter uri da ontologia.
-        $subject_uri = "<" . $full_uri . '#' . $subject . ">";      // -> criação da uri com o sujeito.
-        $result = false;
+        //Variáveis utilizadas:
+        //Obter a URI da ontologia.
+        $full_uri = $this->getURI();                                
+        //Criação da URI do sujeito.
+        $subject_uri = "<" . $full_uri . '#' . $subject . ">";
 
         if ($type == 'fixo') {
             exit;
         } else if ($type == 'naoFixo') {
             exit;
         } else if ($type == 'membro') {
-        
-            
-        }else if ($type == 'novo1') {
+            exit;
+        } else if ($type == 'novo1') {
             /*
              * SPARQL QUERY:
              * Inserção de uma propriedade do tipo ObjectProperty ou DatatypeProperty
@@ -746,13 +754,8 @@ class PESTI_Controller extends CI_Controller {
              * }
              */
 
-            //Criar a URI do predicado.
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-            //Completar a URI do objecto.
-            $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
-
-            //Enviar os elementos para o método inserir_Data do modelo.
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+            //Chamada da função privada.
+            $result = $this->insertNewPropertyStep1($subject_uri, $object);
 
             //Imprimir o resultado.
             print_r($result);
@@ -771,27 +774,8 @@ class PESTI_Controller extends CI_Controller {
              * }
              */
 
-            if ($predicate != "type") {
-                if ($predicate == "inverseOf" || $predicate == "equivalentProperty") {
-                    //Criar a URI do predicado.
-                    $predicate_uri = "<http://www.w3.org/2002/07/owl#" . $predicate . ">";
-                } else if ($predicate == "range" || $predicate == "subPropertyOf") {
-                    //Criar a URI do predicado.
-                    $predicate_uri = "<http://www.w3.org/2000/01/rdf-schema#" . $predicate . ">";
-                } else {
-                    print_r("Erro: Predicado n&atilde;o reconhecido...");
-                    exit;
-                }
-
-                $object_uri = "<" . $full_uri . '#' . $object . ">";
-            } else {
-                //Criar a URI do predicado.
-                $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-                $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
-            }
-
-            //Enviar os elementos parao método inserir_Data do modelo.
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+            //Chamada da função privada.
+            $result = $this->insertNewPropertyStep2($subject_uri, $predicate, $object);
 
             //Imprimir o resultado.
             print_r($result);
@@ -804,59 +788,135 @@ class PESTI_Controller extends CI_Controller {
     }
 
     public function deleteData($type, $subject, $object) {
-        // Variáveis utilizadas:
-        $full_uri = $this->getURI();                 // -> obter uri da ontologia.
-        $subject_uri = "<" . $full_uri . '#' . $subject . ">";  // -> criação da uri com o sujeito.
-        $result = false;
+        //Variáveis utilizadas:
+        //Obter a URI da ontologia.
+        $full_uri = $this->getURI();
+        //Criação da URI do sujeito.
+        $subject_uri = "<" . $full_uri . '#' . $subject . ">";
 
-        if ($type == 'classe') {            // -> Eliminação de uma classe.
-            $object_uri = "<" . $full_uri . '#' . $object . ">";  // -> criação da uri com o objecto.
-            $predicate_uri = "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
+        if ($type == 'classe') {
+            //Eliminação de uma classe.
+            //Criação da URI do objecto.
+            $object_uri = "<" . $full_uri . '#' . $object . ">";
 
-            //Primeiro Eliminar
-            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
-
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-            $another_uri = "<http://www.w3.org/2002/07/owl#Class>";
-
-            //Segundo Eliminar
-            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $another_uri);
+            $result = $this->deleteClass($subject_uri, $object_uri);
 
             print_r($result);
 
             exit;
-        } else if ($type == 'membro') {    // -> Eliminação de um membro
-            $object_uri = "<" . $full_uri . '#' . $object . ">";  // -> criação da uri com o objecto.
+        } else if ($type == 'membro') {
+            //Eliminação de um membro.
+            //Criação da URI do objecto.
+            $object_uri = "<" . $full_uri . '#' . $object . ">";
 
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-            $another_uri = "<http://www.w3.org/2002/07/owl#NamedIndividual>";
-
-            //Primeiro Eliminar
-            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $another_uri);
-
-            //Segundo Eliminar
-            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+            $result = $this->deleteMember($subject_uri, $object_uri);
 
             print_r($result);
 
             exit;
-        } else if ($type == 'comentario') {   // -> Eliminação de um comentário
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>";
-            $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $object);
+        } else if ($type == 'comentario') {
+            //Eliminação de um comentário
+            $result = $this->deleteCommentary($subject_uri, $object);
 
             print_r($result);
 
             exit;
         } else {
-            print_r("Erro: Tipo n&atilde;o reconhecido...");
+            print_r("Erro: Tipo n&atilde;o reconhecido...");            
             exit;
         }
     }
 
     //=================Funções Privadas ====================//
+    
+    private function insertNewPropertyStep1($subject_uri, $object){
+        //Definição da URI do predicado RDF:type.
+        $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+        //Definição da URI do objecto.
+        $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
+        
+        $result = $this->sendInsert($subject_uri, $predicate_uri, $object_uri);
+        
+        return $result;
+    }
+    
+    private function insertNewPropertyStep2($subject_uri, $predicate, $object) {
+        //Verificação se o $predicate é do tipo "type" ou um dos seguintes.
+        if ($predicate != "type") {
+            //Definição da URI do objecto.
+            $full_uri = $this->getURI();
+            $object_uri = "<" . $full_uri . '#' . $object . ">";
+            //Verificação se é inverseOf ou equivalentPropery.
+            if ($predicate == "inverseOf" || $predicate == "equivalentProperty") {
+                //Definição da URI para estes dois predicados.
+                $predicate_uri = "<http://www.w3.org/2002/07/owl#" . $predicate . ">";
+                //Verificação se é range ou subPropertyOf.
+            } else if ($predicate == "range" || $predicate == "subPropertyOf") {
+                //Definição da URI para estes dois predicados.
+                $predicate_uri = "<http://www.w3.org/2000/01/rdf-schema#" . $predicate . ">";
+            } else {
+                print_r("Erro: Predicado n&atilde;o reconhecido...");
+                exit;
+            }
+        } else {
+            //Definição da URI do predicado RDF:type.
+            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+            //Definição da URI do objecto.
+            $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
+        }
+
+        $result = $this->sendInsert($subject_uri, $predicate_uri, $object_uri);
+
+        return $result;
+    }
+
+    private function deleteClass($subject_uri, $object1_uri) {
+        //Definição do predicado RDFS:subClassOf para a primeira eliminação.
+        $predicate1_uri = "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
+        //Definição do predicado RDF:type para a segunda eliminação.
+        $predicate2_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+        //Definição do objecto OWL:Class para a segunda eliminação.
+        $object2_uri = "<http://www.w3.org/2002/07/owl#Class>";
+
+        //Primeira eliminação.
+        $result = $this->sendDelete($subject_uri, $predicate1_uri, $object1_uri);
+
+        if ($result == 1) {
+            //Segunda eliminação.
+            $result = $this->sendDelete($subject_uri, $predicate2_uri, $object2_uri);
+        }
+
+        return $result;
+    }
+
+    private function deleteMember($subject_uri, $object2_uri) {
+        //Definição do predicado RDF:type.
+        $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+        //Definição do objecto OWL:NamedIndividual para a primeira eliminação.
+        $object1_uri = "<http://www.w3.org/2002/07/owl#NamedIndividual>";
+
+        //Primeira eliminação.
+        $result = $this->sendDelete($subject_uri, $predicate_uri, $object1_uri);
+
+        if ($result == 1) {
+            //Segunda eliminação.
+            $result = $this->sendDelete($subject_uri, $predicate_uri, $object2_uri);
+        }
+
+        return $result;
+    }
+
+    private function deleteCommentary($subject_uri, $object) {
+        //Definição do predicado RDF:Comment
+        $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>";
+
+        $result = $this->sendDelete($subject_uri, $predicate_uri, $object);
+
+        return $result;
+    }
 
     private function sendQuery($query, $xslfile) {
-        //variável XML recebe o resultado da query obtido do método presente no modelo
+        //Variável XML recebe o resultado da query obtido do método presente no modelo
         $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
 
         if (!$xml) {
@@ -868,8 +928,22 @@ class PESTI_Controller extends CI_Controller {
         return $result;
     }
 
+    private function sendInsert($subject, $predicate, $object){
+        //Variável result recebe 1 se a inserção for com sucesso.
+        $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject, $predicate, $object);
+        
+        return $result;
+    }
+    
+    private function sendDelete($subject, $predicate, $object) {
+        //Variável result recebe 1 se a eliminação for com sucesso.
+        $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject, $predicate, $object);
+
+        return $result;
+    }
+
     private function getURI() {
-        // -> Query reutilizada da função listClasses...
+        //Query reutilizada da função listClasses...
         $query = 'PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#> ';
         $query = $query . 'PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
         $query = $query . 'PREFIX a: <http://www.w3.org/2002/07/owl#> ';
@@ -882,13 +956,16 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . 'UNION {?classeMae a:equivalentClass ?classe2}}}';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
-        //variável XML recebe o resultado da query obtido do método presente no modelo
+        //Variável XML recebe o resultado da query obtido do método presente no modelo
         $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
 
-        //retirar a URI do resultado XML
-        $getfullURI = explode("<uri>", $xml);        // -> primeiro explode (split em JS) que vai procurar no XML todas as ocurrências de <uri>.
-        $fullURI = $getfullURI[1];                   // -> em príncipio todas as classe mae pertencem a mesma ontologia, logo só nos interessa a que esta na posição 1 do array retornado pelo explode anterior.
-        $getURI = explode("#", $fullURI);           // -> voltamos a fazer um explode para obter apenas o URI da ontologia (ex: http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl).
+        //Retirar a URI do resultado XML
+        //Primeiro explode (split em JS) que vai procurar no XML todas as ocurrências de <uri>.
+        $getfullURI = explode("<uri>", $xml);
+        //Em príncipio todas as classe mae pertencem a mesma ontologia, logo só nos interessa a que esta na posição 1 do array retornado pelo explode anterior.
+        $fullURI = $getfullURI[1];
+        //Voltamos a fazer um explode para obter apenas o URI da ontologia (ex: http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl).
+        $getURI = explode("#", $fullURI);
 
         return $getURI[0];
     }
@@ -902,5 +979,4 @@ class PESTI_Controller extends CI_Controller {
 
         return $result;
     }
-
 }
