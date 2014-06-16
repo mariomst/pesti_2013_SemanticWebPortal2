@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 2.5
+ * Versão 2.6
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -26,6 +26,7 @@
  * 2.3 -> adição da função deleteData, descrição da função indicada em baixo.
  * 2.4 -> alteração da forma como as queries eram enviadas para o Model. Correcção de alguns erros.
  * 2.5 -> adição das funções getClassProperty_M1 e getClassProperty_M2.
+ * 2.6 -> adição da função insertProperty.
  *
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -42,6 +43,7 @@
  * getMemberProperty        -> recebe um xml com as propriedades de um determinado membro.
  * printURI                 -> imprime a uri da ontolgia.
  * insertData               -> inserção de novos dados na ontologia.
+ * insertProperty           -> inserção de propriedades em elementos da ontologia.
  * deteleData               -> eliminação de dados da ontologia.
  *
  * Funções Privadas:
@@ -51,7 +53,7 @@
  */
 
 //Configurações do PHP
-//error_reporting(0);         // -> Comentar isto para ativar as mensagens de erro do PHP.
+error_reporting(0);         // -> Comentar isto para ativar as mensagens de erro do PHP.
 
 class PESTI_Controller extends CI_Controller {
 
@@ -693,10 +695,6 @@ class PESTI_Controller extends CI_Controller {
             print_r($result);
 
             exit;
-        } else if ($type == 'propriedade') {  // -> adição na ontologia de propriedades
-            /* AINDA NAO DESENVOLVIDO */
-            print_r("Tipo: Propriedade");
-            exit;
         } else if ($type == 'comentario') {
             /*
               SPARQL QUERY:
@@ -718,6 +716,89 @@ class PESTI_Controller extends CI_Controller {
             exit;
         } else {
             print_r("Erro: Tipo n&atilde;o reconhecido...");
+            exit;
+        }
+    }
+
+    public function insertProperty($type, $subject, $predicate, $object) {
+        //Variáveis utilizadas
+        $full_uri = $this->getURI();                                // -> obter uri da ontologia.
+        $subject_uri = "<" . $full_uri . '#' . $subject . ">";      // -> criação da uri com o sujeito.
+        $result = false;
+
+        if ($type == 'fixo') {
+            exit;
+        } else if ($type == 'naoFixo') {
+            exit;
+        } else if ($type == 'membro') {
+        
+            
+        }else if ($type == 'novo1') {
+            /*
+             * SPARQL QUERY:
+             * Inserção de uma propriedade do tipo ObjectProperty ou DatatypeProperty
+             * 
+             * INSERT DATA
+             * {
+             *      <subject_uri>
+             *      <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+             *      <object_uri>
+             * }
+             */
+
+            //Criar a URI do predicado.
+            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+            //Completar a URI do objecto.
+            $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
+
+            //Enviar os elementos para o método inserir_Data do modelo.
+            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+
+            //Imprimir o resultado.
+            print_r($result);
+
+            exit;
+        } else if ($type == 'novo2') {
+            /*
+             * SPARQL QUERY:
+             * Inserção de tipos de FunctionalProperties
+             * 
+             * INSERT DATA
+             * {
+             *      <subject_uri>
+             *      <predicate_uri>
+             *      <object_uri>
+             * }
+             */
+
+            if ($predicate != "type") {
+                if ($predicate == "inverseOf" || $predicate == "equivalentProperty") {
+                    //Criar a URI do predicado.
+                    $predicate_uri = "<http://www.w3.org/2002/07/owl#" . $predicate . ">";
+                } else if ($predicate == "range" || $predicate == "subPropertyOf") {
+                    //Criar a URI do predicado.
+                    $predicate_uri = "<http://www.w3.org/2000/01/rdf-schema#" . $predicate . ">";
+                } else {
+                    print_r("Erro: Predicado n&atilde;o reconhecido...");
+                    exit;
+                }
+
+                $object_uri = "<" . $full_uri . '#' . $object . ">";
+            } else {
+                //Criar a URI do predicado.
+                $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+                $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
+            }
+
+            //Enviar os elementos parao método inserir_Data do modelo.
+            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+
+            //Imprimir o resultado.
+            print_r($result);
+
+            exit;
+        } else {
+            print_r("Erro: Tipo de propriedade n&atilde;o reconhecido...");
             exit;
         }
     }
@@ -744,7 +825,6 @@ class PESTI_Controller extends CI_Controller {
             print_r($result);
 
             exit;
-            
         } else if ($type == 'membro') {    // -> Eliminação de um membro
             $object_uri = "<" . $full_uri . '#' . $object . ">";  // -> criação da uri com o objecto.
 
@@ -761,17 +841,6 @@ class PESTI_Controller extends CI_Controller {
 
             exit;
         } else if ($type == 'comentario') {   // -> Eliminação de um comentário
-            /*
-              SPARQL QUERY:
-
-              DELETE DATA
-              {
-              <$subject_uri>
-              <http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>
-              "$object".
-              }
-             */
-
             $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>";
             $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject_uri, $predicate_uri, $object);
 

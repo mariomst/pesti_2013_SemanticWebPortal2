@@ -326,7 +326,6 @@ function deleteClass(classLabel, superClassLabel)
     subClassesList_length = $(result_subClassesList).find('li').length;
     //Obter o tamanho da lista de membros.
     membersList_length = $(result_membersList).find('li').length;
-    ;
 
     //Verifica se existem subclasses da Classe a ser eliminada.
     if (subClassesList_length != 0)
