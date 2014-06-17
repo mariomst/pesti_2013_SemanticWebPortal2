@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 2.7
+ * Versão 2.8
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -28,6 +28,7 @@
  * 2.5 -> adição das funções getClassProperty_M1 e getClassProperty_M2.
  * 2.6 -> adição da função insertProperty.
  * 2.7 -> alteração da estrutura, criação de algumas funções privadas, descrição indicada em baixo.
+ * 2.8 -> alterado a função insertData, para cada caso chama a função privada apropriada; adição das funções privadas. insertClass, insertMember, insertCommentary.
  *
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -43,11 +44,18 @@
  * getClassProperty_M2      -> recebe um xml com os nodos first e rest e analisa-os.
  * getMemberProperty        -> recebe um xml com as propriedades de um determinado membro.
  * printURI                 -> imprime a uri da ontolgia.
+ * getCommentary            -> recebe o comentário associado ao elemento indicado.
  * insertData               -> inserção de novos dados na ontologia.
  * insertProperty           -> inserção de propriedades em elementos da ontologia.
  * deteleData               -> eliminação de dados da ontologia.
  *
  * Funções Privadas:
+ * insertClass              -> inserção de uma classe.
+ * insertMember             -> inserção de um membro.
+ * insertCommentary         -> inserção de um comentário.
+ * insertFixedProperty      -> inserção de propriedades fixas em classes.
+ * insertNotFixedProperty   -> inserção de propriedades não fixas em classes.
+ * insertMemberProperty     -> inserção de propriedades em membros.
  * insertNewPropertyStep1   ->
  * insertNewPropertyStep2   -> 
  * deleteClass              -> eliminação da classe.
@@ -400,7 +408,7 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //variável XML recebe o resultado da query obtido do método presente no modelo
-        $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
+        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
 
         //Obter o tipo de propriedade
         $literal = explode("<literal>", $xml);
@@ -555,7 +563,7 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //variável XML recebe o resultado da query obtido do método presente no modelo
-        $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
+        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
 
         //retirar apenas a URI do resultado XML
         $getfullURI = explode("<uri>", $xml);        // -> primeiro explode (split em JS) que vai procurar no XML todas as ocurrências de <uri>.
@@ -588,7 +596,7 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //variável XML recebe o resultado da query obtido do método presente no modelo
-        $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
+        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
 
         //retirar o comentário do XML
         if (strpos($xml, 'literal') !== false) {
@@ -610,114 +618,85 @@ class PESTI_Controller extends CI_Controller {
         $result = false;
 
         if ($type == 'teste') {
-            print_r("Apenas para testes...<br>");
-            print_r("<table border=1>");
-            print_r("<tr>");
-            print_r("<td>Tipo</td>");
-            print_r("<td>" . $type . "</td>");
-            print_r("</tr>");
-            print_r("<tr>");
-            print_r("<td>URI</td>");
-            print_r("<td>" . $full_uri . "</td>");
-            print_r("</tr>");
-            print_r("<tr>");
-            print_r("<td>URI do Sujeito</td>");
-            print_r("<td>" . htmlspecialchars($subject_uri) . "</td>");
-            print_r("</tr>");
-            print_r("<tr>");
-            print_r("<td>URI do Objecto</td>");
-            print_r("<td>" . htmlspecialchars($object_uri) . "</td>");
-            print_r("</tr>");
-            print_r("</table>");
+            //Teste para verificar se a URI é obtida correctamente.
+            $this->testURI($type, $full_uri, $subject_uri, $object_uri);
 
             exit;
-        } else if ($type == 'membro') {    // -> adição na ontologia de membros
+        } else if ($type == 'membro') {
+            //Adição de membros.
+
             /*
-              SPARQL QUERY para inserção de membros (2 Inserts):
-
-              PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
-              PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-              PREFIX a: <http://www.w3.org/2002/07/owl#>
-
-              INSERT DATA
-              {
-              <$subject_uri>
-              rdfns:type
-              a:NamedIndividual
-              }
-
-              INSERT DATA
-              {
-              <$subject_uri>
-              rdfns:type
-              <$object_uri>
-              }
+             * SPARQL QUERY para inserção de membros (2 Inserts):
+             * 
+             * PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+             * PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             * PREFIX a: <http://www.w3.org/2002/07/owl#>
+             * 
+             * INSERT DATA
+             * {
+             * <$subject_uri>
+             * rdfns:type
+             * a:NamedIndividual
+             * }
+             * 
+             * INSERT DATA
+             * {
+             * <$subject_uri>
+             * rdfns:type
+             * <$object_uri>
+             * }
              */
 
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-            $another_uri = "<http://www.w3.org/2002/07/owl#NamedIndividual>";
-
-            //Primeiro Insert
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $another_uri);
-
-            //Segundo Insert
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
+            $result = $this->insertMember($subject_uri, $object_uri);
 
             print_r($result);
 
             exit;
-        } else if ($type == 'subclasse') {  // -> adição na ontologia de subclasses
+        } else if ($type == 'subclasse') {
+            //Adição de subclasses
+
             /*
-              SPARQL Query para inserção de subclasses
-
-              PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
-              PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-              PREFIX a: <http://www.w3.org/2002/07/owl#>
-
-              INSERT DATA
-              {
-              <$subject_uri>
-              <http://www.w3.org/2000/01/rdf-schema#subClassOf>
-              <$object_uri>
-              }
-
-              INSERT DATA
-              {
-              <$subject_uri>
-              <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
-              <http://www.w3.org/2002/07/owl#Class>
-              }
+             * SPARQL Query para inserção de subclasses
+             * 
+             * PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+             * PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             * PREFIX a: <http://www.w3.org/2002/07/owl#>
+             * 
+             * INSERT DATA
+             * {
+             * <$subject_uri>
+             * <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+             * <$object_uri>
+             * }
+             * 
+             * INSERT DATA
+             * {
+             * <$subject_uri>
+             * <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+             * <http://www.w3.org/2002/07/owl#Class>
+             * }
              */
 
-            $predicate_uri = "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
-
-            //Primeiro Insert
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object_uri);
-
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
-            $another_uri = "<http://www.w3.org/2002/07/owl#Class>";
-
-            //Segundo Insert
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $another_uri);
+            $result = $this->insertClass($subject_uri, $object_uri);
 
             print_r($result);
 
             exit;
         } else if ($type == 'comentario') {
-            /*
-              SPARQL QUERY:
+            //Adição de um comentário.
 
-              INSERT DATA
-              {
-              <$subject_uri>
-              <http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>
-              "$object".
-              }
+            /*
+             * SPARQL Query:
+             * 
+             * INSERT DATA
+             * {
+             * <$subject_uri>
+             * <http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>
+             * "$object".
+             * }
              */
 
-            $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>";
-
-            $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject_uri, $predicate_uri, $object);
+            $result = $this->insertCommentary($subject_uri, $object);
 
             print_r($result);
 
@@ -728,18 +707,52 @@ class PESTI_Controller extends CI_Controller {
         }
     }
 
-    public function insertProperty($type, $subject, $predicate, $object) {
-        //Variáveis utilizadas:
+    public function insertProperty($type, $subject, $predicate, $object, $range) {
         //Obter a URI da ontologia.
-        $full_uri = $this->getURI();                                
+        $full_uri = $this->getURI();
         //Criação da URI do sujeito.
-        $subject_uri = "<" . $full_uri . '#' . $subject . ">";
+        $subject_uri = "<" . $full_uri . "#" . $subject . ">";
 
         if ($type == 'fixo') {
+            //Ainda não desenvolvido.
+            print_r("Erro: Ainda n&atilde;o desenvolvido...");
             exit;
         } else if ($type == 'naoFixo') {
+            /*
+             * SPARQL QUERY:
+             * 
+             * INSERT DATA
+             * {
+             *      ?classe rdfs:subClassOf _:foo
+             *      _:foo rdf:type owl:Restriction
+             *      _:foo owl:someValuesFrom ?range
+             *      _:foo owl:onProperty ?propriedade
+             * }
+             */
+
+            //Chamada da função privada.
+            $result = $this->insertNotFixedProperty($subject_uri, $object, $range);
+
+            print_r($result);
+
             exit;
         } else if ($type == 'membro') {
+            /*
+             * SPARQL QUERY:
+             * 
+             * INSERT DATA
+             * {
+             *      <subject_uri>       =>  membro
+             *      <predicate_uri>     =>  temX
+             *      <object_uri>        =>  valor
+             * }
+             */
+
+            //Chamada da função privada.
+            $result = $this->insertMemberProperty($subject_uri, $predicate, $object);
+
+            //Impressão do resultado.
+            print_r($result);
             exit;
         } else if ($type == 'novo1') {
             /*
@@ -757,9 +770,8 @@ class PESTI_Controller extends CI_Controller {
             //Chamada da função privada.
             $result = $this->insertNewPropertyStep1($subject_uri, $object);
 
-            //Imprimir o resultado.
+            //Impressão do resultado.
             print_r($result);
-
             exit;
         } else if ($type == 'novo2') {
             /*
@@ -777,9 +789,8 @@ class PESTI_Controller extends CI_Controller {
             //Chamada da função privada.
             $result = $this->insertNewPropertyStep2($subject_uri, $predicate, $object);
 
-            //Imprimir o resultado.
+            //Impressão do resultado.
             print_r($result);
-
             exit;
         } else {
             print_r("Erro: Tipo de propriedade n&atilde;o reconhecido...");
@@ -822,24 +833,108 @@ class PESTI_Controller extends CI_Controller {
 
             exit;
         } else {
-            print_r("Erro: Tipo n&atilde;o reconhecido...");            
+            print_r("Erro: Tipo n&atilde;o reconhecido...");
             exit;
         }
     }
 
-    //=================Funções Privadas ====================//
-    
-    private function insertNewPropertyStep1($subject_uri, $object){
+    //================= Funções Privadas ====================//
+
+    private function insertClass($subject_uri, $object1_uri) {
+        //Definição do predicado RDFS:subClassOf para a primeira inserção.
+        $predicate1_uri = "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
+        //Definição do predicado RDF:type para a segunda inserção.
+        $predicate2_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+        //Definição do objecto OWL:Class para a segunda inserção.
+        $object2_uri = "<http://www.w3.org/2002/07/owl#Class>";
+
+        //Primeira inserção.
+        $result = $this->sendInsert($subject_uri, $predicate1_uri, $object1_uri);
+
+        if ($result == 1) {
+            //Segunda inserção.
+            $result = $this->sendInsert($subject_uri, $predicate2_uri, $object2_uri);
+        }
+
+        return $result;
+    }
+
+    private function insertMember($subject_uri, $object2_uri) {
+        //Definição do predicado RDF:type.
+        $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+        //Definição do objecto OWL:NamedIndividual para a primeira inserção.
+        $object1_uri = "<http://www.w3.org/2002/07/owl#NamedIndividual>";
+
+        //Primeira inserção.
+        $result = $this->sendInsert($subject_uri, $predicate_uri, $object1_uri);
+
+        if ($result == 1) {
+            //Segunda inserção.
+            $result = $this->sendInsert($subject_uri, $predicate_uri, $object2_uri);
+        }
+
+        return $result;
+    }
+
+    private function insertCommentary($subject_uri, $object) {
+        //Definição da URI do predicado RDF:comment.
+        $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>";
+
+        //Enviar os argumentos para a função privada sendInsert.
+        $result = $this->sendInsert($subject_uri, $predicate_uri, $object);
+
+        return $result;
+    }
+
+    private function insertFixedProperty() {
+        //Função ainda não desenvolvida.
+    }
+
+    private function insertNotFixedProperty($subject_uri, $object, $range) {
+        //Definição da URI da ontologia.
+        $full_uri = $this->getURI();
+        //Definição da URI do objecto.
+        $object_uri = "<" . $full_uri . "#" . $object . ">";
+        //Definição da URI do range.
+        $range_uri = "<" . $full_uri . "#" . $range . ">";
+
+        //Construcção dos argumentos para enviar a função do model.
+        $argumentos = $subject_uri . " <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:foo";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction>";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#someValuesFrom> " . $range_uri;
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onProperty> " . $object_uri;
+
+        //Envio para a função insert_data_2 que recebe vários argumentos.
+        $result = $this->pesti_model->inserir_data_2($this->url_db_insert, $argumentos);
+
+        return $result;
+    }
+
+    private function insertMemberProperty($subject_uri, $predicate, $object) {
+        //Definição da URI da ontologia.
+        $full_uri = $this->getURI();
+        //Criação da URI do predicado.
+        $predicate_uri = "<" . $full_uri . "#" . $predicate . ">";
+        //Criação da URI do objecto.
+        $object_uri = "<" . $full_uri . "#" . $object . ">";
+
+        //Enviar as variáveis para a função privada sendInsert.
+        $result = $this->sendInsert($subject_uri, $predicate_uri, $object_uri);
+
+        return $result;
+    }
+
+    private function insertNewPropertyStep1($subject_uri, $object) {
         //Definição da URI do predicado RDF:type.
         $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
         //Definição da URI do objecto.
         $object_uri = "<http://www.w3.org/2002/07/owl#" . $object . ">";
-        
+
         $result = $this->sendInsert($subject_uri, $predicate_uri, $object_uri);
-        
+
         return $result;
     }
-    
+
     private function insertNewPropertyStep2($subject_uri, $predicate, $object) {
         //Verificação se o $predicate é do tipo "type" ou um dos seguintes.
         if ($predicate != "type") {
@@ -917,7 +1012,7 @@ class PESTI_Controller extends CI_Controller {
 
     private function sendQuery($query, $xslfile) {
         //Variável XML recebe o resultado da query obtido do método presente no modelo
-        $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
+        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
 
         if (!$xml) {
             $result = "<br><font color=\"red\"><b>Erro SPARQL: Ocorreu um erro a retornar a informa&ccedil;&atilde;o, verifique se o endere&ccedil;o est&aacute; correcto.</b></font>";
@@ -928,13 +1023,13 @@ class PESTI_Controller extends CI_Controller {
         return $result;
     }
 
-    private function sendInsert($subject, $predicate, $object){
+    private function sendInsert($subject, $predicate, $object) {
         //Variável result recebe 1 se a inserção for com sucesso.
-        $result = $this->pesti_model->inserir_Data($this->url_db_insert, $subject, $predicate, $object);
-        
+        $result = $this->pesti_model->inserir_data($this->url_db_insert, $subject, $predicate, $object);
+
         return $result;
     }
-    
+
     private function sendDelete($subject, $predicate, $object) {
         //Variável result recebe 1 se a eliminação for com sucesso.
         $result = $this->pesti_model->eliminar_data($this->url_db_insert, $subject, $predicate, $object);
@@ -957,7 +1052,7 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Variável XML recebe o resultado da query obtido do método presente no modelo
-        $xml = $this->pesti_model->enviar_query($this->url_db_consult, $query);
+        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
 
         //Retirar a URI do resultado XML
         //Primeiro explode (split em JS) que vai procurar no XML todas as ocurrências de <uri>.
@@ -979,4 +1074,27 @@ class PESTI_Controller extends CI_Controller {
 
         return $result;
     }
+
+    private function testURI($type, $full_uri, $subject_uri, $object_uri) {
+        print_r("Apenas para testes...<br>");
+        print_r("<table border=1>");
+        print_r("<tr>");
+        print_r("<td>Tipo</td>");
+        print_r("<td>" . $type . "</td>");
+        print_r("</tr>");
+        print_r("<tr>");
+        print_r("<td>URI</td>");
+        print_r("<td>" . $full_uri . "</td>");
+        print_r("</tr>");
+        print_r("<tr>");
+        print_r("<td>URI do Sujeito</td>");
+        print_r("<td>" . htmlspecialchars($subject_uri) . "</td>");
+        print_r("</tr>");
+        print_r("<tr>");
+        print_r("<td>URI do Objecto</td>");
+        print_r("<td>" . htmlspecialchars($object_uri) . "</td>");
+        print_r("</tr>");
+        print_r("</table>");
+    }
+
 }

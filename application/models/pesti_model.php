@@ -4,7 +4,7 @@
  * PESTI Model
  * - Envia os pedidos do controller para o Servidor Fuseki e retorna as respostas.
  *
- * Versão 2.2
+ * Versão 2.4
  *
  * @author Mário Teixeira
  * @author Marta Graça
@@ -14,16 +14,19 @@
  * 2.0   ->  Criação e desenvolvimento da função inserir_data;
  * 2.1   ->  Criação da função eliminar_data;
  * 2.2   ->  Desenvolvimento da função eliminar_data;
+ * 2.3   ->  Desenvolvimento da função inserir_data_2;
+ * 2.4   ->  Alteração da função consultar_data; Adicionado as funções privadas executar_consulta e executar_update;
  *
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
- * enviar_query  ->  Junta o URL da TDB e a query e envia para a função privada obter_xml.
- * inserir_data  ->  Insere data na TDB usando uma query de inserção simples.
- * inserir_data_mais_argumentos -> Insere data na TDB usando uma query com vários argumentos.
- * eliminar_data ->  Elimina data da TDB usando uma query de eliminação simples.
+ * consultar_data   ->  Consulta data da TDB usando a query recebida.
+ * inserir_data     ->  Insere data na TDB usando uma query de inserção simples.
+ * inserir_data_2   ->  Insere data na TDB usando uma query com vários argumentos.
+ * eliminar_data    ->  Elimina data da TDB usando uma query de eliminação simples.
  *
  * Funções Privadas:
- * obter_xml     ->  Faz um pedido ao servidor Fuseki para retornar a resposta em XML da query enviada.
+ * executar_consulta  ->  Faz um pedido SPARQL ao servidor Fuseki para retornar a resposta da query enviada.
+ * executar_update    ->  Faz um envio Update ao servidor Fuseki com a query recebida.
  */
 
 class PESTI_Model extends CI_Model {
@@ -32,42 +35,28 @@ class PESTI_Model extends CI_Model {
         //pode ficar vazio
     }
 
-    //=================Funções Públicas ====================//
+    //================= Funções Públicas ====================//
 
-    public function enviar_query($url_db, $query) {
-        $aux = 'query=' . $query;
-        
-        $post = curl_init();
-        
-        curl_setopt($post, CURLOPT_URL, $url_db);
-        curl_setopt($post, CURLOPT_POSTFIELDS, $aux);
-        curl_setopt($post, CURLOPT_RETURNTRANSFER, 1);
-        
-        $response = curl_exec($post);
+    public function consultar_data($url_db, $argumentos) {
+        $query = 'query=' . $argumentos;
 
-        curl_close($post);
-        
-        return $response;
+        $result = $this->executar_consulta($url_db, $query);
+
+        return $result;
     }
 
     public function inserir_data($url_db, $sujeito, $predicado, $objecto) {
         $query = "update=INSERT DATA {" . $sujeito . $predicado . $objecto . "}";
 
-        $result = $this->executar_query($url_db, $query);
+        $result = $this->executar_update($url_db, $query);
 
         return $result;
     }
 
-    public function inserir_data_mais_argumentos($url_db, $argumentos) {
-        $query = "update=INSERT DATA {";
+    public function inserir_data_2($url_db, $argumentos) {
+        $query = "update=INSERT DATA {" . $argumentos . "}";
 
-        foreach ($argumentos as &$argumento) {
-            $query = $query . $argumento;
-        }
-
-        $query = $query . "}";
-
-        $result = $this->executar_query($url_db, $query);
+        $result = $this->executar_update($url_db, $query);
 
         return $result;
     }
@@ -75,20 +64,28 @@ class PESTI_Model extends CI_Model {
     public function eliminar_data($url_db, $sujeito, $predicado, $objecto) {
         $query = "update=DELETE DATA {" . $sujeito . $predicado . $objecto . "}";
 
-        $result = $this->executar_query($url_db, $query);
+        $result = $this->executar_update($url_db, $query);
 
         return $result;
     }
 
-    //=================Funções Privadas ====================//
+    //================= Funções Privadas ====================//
 
-    private function obter_xml($url) {
-        $resposta_xml_data = file_get_contents($url);
+    private function executar_consulta($url_db, $query) {
+        $post = curl_init();
 
-        return $resposta_xml_data;
+        curl_setopt($post, CURLOPT_URL, $url_db);
+        curl_setopt($post, CURLOPT_POSTFIELDS, $query);
+        curl_setopt($post, CURLOPT_RETURNTRANSFER, 1);
+
+        $response = curl_exec($post);
+
+        curl_close($post);
+
+        return $response;
     }
 
-    private function executar_query($url_db, $query) {
+    private function executar_update($url_db, $query) {
         $post = curl_init();
 
         curl_setopt($post, CURLOPT_URL, $url_db);

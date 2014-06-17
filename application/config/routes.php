@@ -45,11 +45,12 @@ if (!defined('BASEPATH'))
 $route['default_controller'] = 'pesti_controller/view';
 $route['login'] = 'user_controller/viewLogin';
 $route['register'] = 'user_controller/viewRegister';
+$route['insertClass'] = 'pesti_controller/viewInsertClass';
+$route['insertClass/(:any)'] = 'pesti_controller/viewInsertClass/$1';
 
 //Páginas De Inserção de Dados na Ontologia
 $route['insertData/(:any)/(:any)/(:any)'] = 'pesti_controller/insertData/$1/$2/$3';
-$route['insertClass'] = 'pesti_controller/viewInsertClass';
-$route['insertClass/(:any)'] = 'pesti_controller/viewInsertClass/$1';
+$route['insertProperty/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_controller/insertProperty/$1/$2/$3/$4/$5';
 
 //Páginas De Eliminação de Dados na Ontologia
 $route['deleteData/(:any)/(:any)/(:any)'] = 'pesti_controller/deleteData/$1/$2/$3';
@@ -65,7 +66,6 @@ $route['getMemberProperty/(:any)'] = 'pesti_controller/getMemberProperty/$1';
 $route['getComment/(:any)'] = 'pesti_controller/getComment/$1';
 
 //Outros
-$route['teste'] = 'pesti_controller/getComments_2';
 $route['printURI'] = 'pesti_controller/printURI';
 $route['(:any)'] = 'pesti_controller/view/$1';
 
