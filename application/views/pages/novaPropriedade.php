@@ -1,101 +1,146 @@
-<!-- Página de Inserção de uma nova propriedade -->
-<!-- Versão 1.0									-->
+<!-- Página de inserção de uma nova propriedade
+
+     Versão 1.0
+
+     @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
+     @author Marta Graça       1100640     1100640@isep.ipp.pt
+
+     Argumentos que recebe:
+     type       ->  aonde é que vai ser inserido a nova propriedade, se é num membro ou classe;
+     element    ->  nome do membro / classe onde vai ser inserido a nova propriedade.
+
+     Exemplo:
+     /index.php/novaPropriedade?type=membro&element=XPTO
+
+     A nova propriedade vai ser inserida no elemento XPTO que é um membro.
+-->
 
 <html>
     <head>
-        <title>
-		    <?php echo $title ?>
-	    </title>
-    </head>    
-	<body>
-		<!-- Funções JavaScript -->
+        <title><?php echo $title ?></title>
+        <!-- Carregamento dos ficheiros JavaScript -->
         <script type="text/javascript" src="/assets/js/jquery.min.js"></script>
-		
-		<!-- Cascading Style Sheets -->
-		<link rel="stylesheet" href="/assets/css/stylesheet.css" type="text/css" media="screen"/>
-		
-		<h2 align="center">&#8226; Inser&ccedil;&atilde;o de uma nova propriedade</h2>
-		
-		<div align = "center">
-			<form align = "center" class="forms">
-				<b>Insira o nome da propriedade: </b>
-				<input type="text" id="propName" style="width: 280px">
-				<br>
-				<br>
-				<b>Escolha o tipo de propriedade: </b>
-				<br>
-				<br>
-				<input type="radio" name="propType" value="DatatypeProperty">DatatypeProperty</input>
-					<div align="right" class="propTypeDiv" id="DTP_div" style="display: none;">
-						<!-- Vai ser tratado pelo JavaScript -->						
-					</div>
-				<br>
-				<input type="radio" name="propType" value="ObjectProperty">ObjectProperty</input>
-					<div align="left" class="propTypeDiv" id="OP_div" style="display: none;">
-						<input type="checkbox" class="property" value="FunctionalProperty">FunctionalProperty</input></br>
-						<input type="checkbox" class="property" value="InverseFunctionalProperty">InverseFunctionalProperty</input></br>
-						<input type="checkbox" class="property" value="TransitiveProperty">TransitiveProperty</input></br>
-						<input type="checkbox" class="property" value="SymmetricProperty">SymmetricProperty</input></br>
-						<input type="checkbox" class="property" value="AsymmetricProperty">AsymmetricProperty</input></br>
-						<input type="checkbox" class="property" value="ReflexiveProperty">ReflexiveProperty</input></br>
-						<input type="checkbox" class="property" value="IrreflexiveProperty">IrreflexiveProperty</input></br>
-						<input type="checkbox" class="property" value="InverseOf">InverseOf</input></br>
-						<input type="checkbox" class="property" value="EquivalentProperty">EquivalentProperty</input></br>
-						<input type="checkbox" class="property" value="Range">Range</input></br>
-						<input type="checkbox" class="property" value="SubPropertyOf">SubPropertyOf</input>
-					</div>
-				<br>
-				<br>
-				<button id="goBack">&#8592; Voltar</button>
-				<button id="insertNewProp">Inserir</button>
-			</form>
-		</div>
-		
-		<!-- Scripts JavaScript -->
-		<script type="text/javascript">
-			var backButton = document.getElementById("goBack");
-			var insertButton = document.getElementById("insertNewProp");			
-		
-			var $_GET = <?php echo json_encode($_GET); ?>;			//Permitir ao JavaScript buscar variaveis do PHP.
-			var type = $_GET["type"];								//Atribui o type que foi recebido pelo PHP (Se membro ou Classe).
+        <script type="text/javascript" src="/assets/js/JSfunctions.js"></script>
+        <!-- Carregamento dos ficheiros CSS -->
+        <link rel="stylesheet" href="/assets/css/stylesheet.css" type="text/css" media="screen"/>
+    </head>    
+    <body>
+        <h2 align="center">
+            &#8226; Inser&ccedil;&atilde;o de uma nova propriedade no(a)
+            <?php echo htmlspecialchars($_GET["type"]); ?>:
+            <?php echo htmlspecialchars($_GET["element"]); ?>
+        </h2>
 
-			if(type == "membro")
-			{
-				$('#DTP_div').append("Especifico: <input type=\"text\" id=\"DTP_esp\" style=\"width: 200px\">");
-			}
-			else if(type == "classe")
-			{
-				$('#DTP_div').append("Minimo: <input type=\"text\" id=\"dtpv_min\" style=\"width: 200px\">&nbsp;</br>");
-				$('#DTP_div').append("Maximo: <input type=\"text\" id=\"dtpv_max\" style=\"width: 200px\">&nbsp;</br>");
-				$('#DTP_div').append("Especifico: <input type=\"text\" id=\"DTP_esp\" style=\"width: 200px\">&nbsp;");
-			}
-		
-		    $('input[type="radio"]').click(function()
-			{
-				if($(this).attr("value")=="DatatypeProperty")
-				{
-					$("#DTP_div").show();
-					$("#OP_div").hide();
-				}
-				if($(this).attr("value")=="ObjectProperty")
-				{
-					$("#DTP_div").hide();
-					$("#OP_div").show();
-				}
-			});
-			
-			insertButton.onclick = function()
-			{
-			    alert("INFO: Ainda nao implementado...");
-			    $.nmTop().close();
-			    return false;
-			}
-			
-			backButton.onclick = function()
-			{
-			    $.nmTop().close();
-			    return false;
-			};
-		</script>
-	</body>
+        <!-- Criação do formulário -->
+        <div align = "center">
+            <form align = "center" class="forms">
+                <b>Insira o nome da propriedade: </b>
+                <input type="text" id="propName" style="width: 280px">
+                <br>
+                <br>
+                <b>Escolha o tipo de propriedade: </b>
+                <br>
+                <br>
+                <input type="radio" name="propType" value="DatatypeProperty">DatatypeProperty</input>
+                <div align="right" class="propTypeDiv" id="DTP_div" style="display: none;">
+                    <input type="text" id="DTP_value" style="width: 400px"/>					
+                </div>
+                <br>
+                <input type="radio" name="propType" value="ObjectProperty" checked>ObjectProperty</input>
+                <div align="left" class="propTypeDiv" id="OP_div">
+                    <input type="checkbox" class="property" value="FunctionalProperty">FunctionalProperty</input></br>
+                    <input type="checkbox" class="property" value="InverseFunctionalProperty">InverseFunctionalProperty</input></br>
+                    <input type="checkbox" class="property" value="TransitiveProperty">TransitiveProperty</input></br>
+                    <input type="checkbox" class="property" value="SymmetricProperty">SymmetricProperty</input></br>
+                    <input type="checkbox" class="property" value="AsymmetricProperty">AsymmetricProperty</input></br>
+                    <input type="checkbox" class="property" value="ReflexiveProperty">ReflexiveProperty</input></br>
+                    <input type="checkbox" class="property" value="IrreflexiveProperty">IrreflexiveProperty</input></br>
+                    <input type="checkbox" class="property" value="InverseOf">InverseOf</input></br>
+                    <input type="checkbox" class="property" value="EquivalentProperty">EquivalentProperty</input></br>
+                    <input type="checkbox" class="property" value="Range">Range</input></br>
+                    <input type="checkbox" class="property" value="SubPropertyOf">SubPropertyOf</input>
+                </div>
+                <br>
+                <br>
+                <button id="goBack">&#8592; Voltar</button>
+                <button id="insertNewProp">Inserir</button>
+            </form>
+        </div>
+
+        <!-- Código JavaScript para esta página -->
+        <script type="text/javascript">
+            //Atribuir as variáveis, os objectos da página.
+            backButton = document.getElementById("goBack");
+            insertButton = document.getElementById("insertNewProp");
+
+            //Permitir ao JavaScript utilizar os argumentos PHP recebidos.
+            $_GET = <?php echo json_encode($_GET); ?>;
+
+            //Atribuir as variáveis PHP às variáveis JS.
+            elementType = $_GET["type"];
+            elementName = $_GET["element"];
+
+            //Acções para os radiobuttons.
+            $('input[type="radio"]').click(function() {
+                //Verificar qual das radiobuttons foi escolhida e mostrar a respectiva DIV escondida.
+                if ($(this).attr("value") == "DatatypeProperty")
+                {
+                    $("#DTP_div").show();
+                    $("#OP_div").hide();
+                }
+                else
+                {
+                    $("#OP_div").show();
+                    $("#DTP_div").hide();
+                }
+            });
+
+            //Acções para os botões;
+            backButton.onclick = function() {
+                //Criar a URL de acordo com o tipo de elemento que recebemos do PHP.
+                if (elementType == "membro")
+                {
+                    url = "/index.php/insertClass/?type=propriedade&class=" + elementName + "&chamada=2";
+                }
+                else
+                {
+                    url = "/index.php/insertClass/?type=propriedade&class=" + elementName + "&chamada=1";
+                }
+
+                $.nmManual(url);
+                return false;
+            };
+        
+            insertButton.onclick = function(){
+                //Atribuir o valor da caixa de texto propName à uma variável.
+                propertyName = document.getElementById("propName").value;
+                //Atribuir o valor do radiobutton à uma variável.
+                propertyType = $('input[type="radio"]:checked').val();
+                
+                if(propertyName != "")
+                {
+                    //Remove (caso tenha) o background de erro.
+                    $('.error_textbox').removeClass('error_textbox');  
+                    
+                    //Verifica qual é o tipo do elemento para chamar a função Javascript própria.
+                    if(elementType == "membro")
+                    {
+                        insertNewProperty(propertyName, propertyType);
+                    }
+                    else
+                    {
+                        insertNewProperty(propertyName, propertyType);
+                    }
+                }
+                else
+                {
+                    //Adiciona o background de erro.
+                    $('#propName').addClass('error_textbox');
+                }
+                //Fechar a janela nyroModal
+                //$.nmTop().close();
+                return false;
+            };
+        </script>
+    </body>
 </html>

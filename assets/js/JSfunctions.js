@@ -305,6 +305,11 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
     }
 }
 
+function insertNewProperty(propertyName, propertyType)
+{
+    alert("Insercao da propriedade " + propertyName + " do tipo " + propertyType);
+}
+
 function deleteClass(classLabel, superClassLabel)
 {
     //Variáveis utilizadas
