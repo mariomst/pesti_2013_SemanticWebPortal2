@@ -55,10 +55,10 @@
                     <input type="checkbox" class="property" value="AsymmetricProperty">AsymmetricProperty</input></br>
                     <input type="checkbox" class="property" value="ReflexiveProperty">ReflexiveProperty</input></br>
                     <input type="checkbox" class="property" value="IrreflexiveProperty">IrreflexiveProperty</input></br>
-                    <input type="checkbox" class="property" value="InverseOf">InverseOf</input></br>
-                    <input type="checkbox" class="property" value="EquivalentProperty">EquivalentProperty</input></br>
-                    <input type="checkbox" class="property" value="Range">Range</input></br>
-                    <input type="checkbox" class="property" value="SubPropertyOf">SubPropertyOf</input>
+                    <!--<input type="checkbox" class="property" value="inverseOf">InverseOf</input></br>
+                    <input type="checkbox" class="property" value="equivalentProperty">EquivalentProperty</input></br>
+                    <input type="checkbox" class="property" value="range">Range</input></br>
+                    <input type="checkbox" class="property" value="subPropertyOf">SubPropertyOf</input>-->
                 </div>
                 <br>
                 <br>
@@ -123,13 +123,23 @@
                     $('.error_textbox').removeClass('error_textbox');  
                     
                     //Verifica qual é o tipo do elemento para chamar a função Javascript própria.
-                    if(elementType == "membro")
+                    if(propertyType == "DatatypeProperty")
                     {
-                        insertNewProperty(propertyName, propertyType);
+                        //insertNewProperty("novo1", propertyName, "ignore", propertyType);
+                        alert("Ainda nao disponivel...");
                     }
                     else
                     {
-                        insertNewProperty(propertyName, propertyType);
+                        result = insertNewProperty("novo1", propertyName, "ignore", propertyType);
+                        
+                        //Obter os valores de cada checkbox seleccionada.
+                        $('.property:checkbox:checked').each(function()
+                        {
+                            insertNewProperty("novo2", propertyName, "type", ($(this).val()));                            
+                        });
+                        
+                        $.nmTop().close();                        
+                     
                     }
                 }
                 else

@@ -304,7 +304,7 @@
                 $(all_tr_in_a_table).each(function() {
                     var parentID = $(this).attr('id');						//Vai buscar id do tr
                     if (parentID == id) {
-                        $("#range").append("<tr><td><select>" + $("#range select").html() + "</select></td></tr>");
+                        $("#"+id+" #range").append("<tr><td><select>" + $("#"+id+" #range select").html() + "</select></td></tr>");
                     }
                 });
             }

@@ -305,9 +305,25 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
     }
 }
 
-function insertNewProperty(propertyName, propertyType)
+function insertNewProperty(step, propertyName, predicate, propertyType)
 {
-    alert("Insercao da propriedade " + propertyName + " do tipo " + propertyType);
+    //Variáveis utilizadas.
+    url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore"; 
+    
+    $.post(url_insertNewProperty, function(aux)
+    {
+        if(aux != 1)
+        {
+            alert("Erro: Insercao de propriedade sem sucesso.");
+        }
+        else
+        {
+            if(step == "novo2")
+            {
+                alert("Erro: Insercao de propriedade com sucesso.");
+            }
+        }
+    });  
 }
 
 function deleteClass(classLabel, superClassLabel)
