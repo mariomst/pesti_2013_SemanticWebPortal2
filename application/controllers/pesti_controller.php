@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 2.8
+ * Versão 2.9
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -29,13 +29,15 @@
  * 2.6 -> adição da função insertProperty.
  * 2.7 -> alteração da estrutura, criação de algumas funções privadas, descrição indicada em baixo.
  * 2.8 -> alterado a função insertData, para cada caso chama a função privada apropriada; adição das funções privadas. insertClass, insertMember, insertCommentary.
- *
+ * 2.9 -> adição da função selectSubClasses, descrição da função indicada em baixo.
+ * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
  * view                     -> criação da view Página Principal
  * view_insertClass         -> criação da view Inserção
  * listClasses              -> recebe um xml com as super classes existentes na ontologia e retorna uma lista.
  * listSubClasses           -> recebe um xml com as subclasses da classe indicada e retorna uma lista.
+ * selectSubClasses         -> recebe um xml com as subclasses da classe indicada e retorna opções para inserir num select.
  * getSubClasses            -> recebe um xml com as subclasses da classe indicada e retorna uma tabela.
  * getMembers               -> recebe um xml com todos os membros da classe indicada.
  * getProperties            -> recebe um xml com as propriedades existentes na ontologia.
@@ -56,8 +58,8 @@
  * insertFixedProperty      -> inserção de propriedades fixas em classes.
  * insertNotFixedProperty   -> inserção de propriedades não fixas em classes.
  * insertMemberProperty     -> inserção de propriedades em membros.
- * insertNewPropertyStep1   ->
- * insertNewPropertyStep2   -> 
+ * insertNewPropertyStep1   -> inserção do tipo de propriedade.
+ * insertNewPropertyStep2   -> inserção dos elementos para o respectivo tipo de propriedade.
  * deleteClass              -> eliminação da classe.
  * deleteMember             -> eliminação do membro.
  * deleteCommentary         -> eliminação do comentário.
@@ -192,6 +194,54 @@ class PESTI_Controller extends CI_Controller {
 
         //Ficheiro XSL a ser usado para a transformação do XML
         $xslfile = "http://localhost/assets/xsl/lista_subclasses.xsl";  // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
+        //Enviar a query e o ficheiro XSL para o método privado
+        $result = $this->sendQuery($query, $xslfile);
+
+        print_r($result);
+    }
+    
+    public function selectSubClasses($classeMae){
+        /*
+          SPARQL QUERY:
+
+          PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+          PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          PREFIX a: <http://www.w3.org/2002/07/owl#>
+
+          select ?subClasse (strafter(str(?subClasse), "#") AS ?localName)
+          where{
+          {?subClasse rdf:subClassOf ?classe .
+          ?classe rdfns:type a:Class .}
+
+          UNION
+
+          {?subClasse a:equivalentClass ?classe1 .
+          ?classe1 a:intersectionOf ?classe2 .
+          ?classe2 rdfns:first ?classe .
+          ?classe rdfns:type a:Class .}
+          }
+         */
+
+        //Obter a URI completa e adicionar a variável $classeMae
+        $ontologyURI = $this->getURI();
+        $fullURI = '<' . $ontologyURI . '#' . $classeMae . '>';
+
+        $query = 'PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#> ';
+        $query = $query . 'PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
+        $query = $query . 'PREFIX a: <http://www.w3.org/2002/07/owl#> ';
+        $query = $query . 'select ?subClasse (strafter(str(?subClasse), "#") AS ?localName) ';
+        $query = $query . 'where{ ';
+        $query = $query . '{?subClasse rdf:subClassOf ' . $fullURI . '. ';
+        $query = $query . $fullURI . ' rdfns:type a:Class.} ';
+        $query = $query . 'UNION ';
+        $query = $query . '{?subClasse a:equivalentClass ?classe1. ';
+        $query = $query . '?classe1 a:intersectionOf ?classe2. ';
+        $query = $query . '?classe2 rdfns:first ' . $fullURI . '. ';
+        $query = $query . $fullURI . ' rdfns:type a:Class.}}';
+        $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
+
+        //Ficheiro XSL a ser usado para a transformação do XML
+        $xslfile = "http://localhost/assets/xsl/select_subclasses.xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
         //Enviar a query e o ficheiro XSL para o método privado
         $result = $this->sendQuery($query, $xslfile);
 

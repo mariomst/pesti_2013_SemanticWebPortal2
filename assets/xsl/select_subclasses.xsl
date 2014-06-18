@@ -14,7 +14,7 @@
     </xsl:template>
 
     <xsl:template match="sp:result">
-        <option id="Membro">
+        <option id="Classe">
             <xsl:attribute name="value">
                 <xsl:value-of select="normalize-space(sp:binding[@name='localName'])"/>
             </xsl:attribute>

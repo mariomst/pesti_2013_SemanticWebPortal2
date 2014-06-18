@@ -64,6 +64,7 @@ $route['getProperties'] = 'pesti_controller/getProperties';
 $route['getPropertyRange/(:any)/(:any)'] = 'pesti_controller/getPropertyRange/$1/$2';
 $route['getMemberProperty/(:any)'] = 'pesti_controller/getMemberProperty/$1';
 $route['getComment/(:any)'] = 'pesti_controller/getComment/$1';
+$route['selectSubClasses/(:any)'] = 'pesti_controller/selectSubClasses/$1';
 
 //Outros
 $route['printURI'] = 'pesti_controller/printURI';
