@@ -13,6 +13,9 @@
      /index.php/novaPropriedade?type=membro&element=XPTO
 
      A nova propriedade vai ser inserida no elemento XPTO que é um membro.
+
+     Nota:
+     - A inserção esta a ser feita mas parece faltar algo na parte do controller.
 -->
 
 <html>

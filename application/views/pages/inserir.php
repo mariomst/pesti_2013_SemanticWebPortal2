@@ -17,25 +17,26 @@
     </head>
     <body>
         <h2 align="left">&#8226; Classe: 
-            <?php echo htmlspecialchars($_GET["class"]); ?></h2>                                 <!-- Obtêm o nome da classe / membro onde vai ser feita a inserção -->
+            <!-- Obtêm o nome da classe / membro onde vai ser feita a inserção -->
+            <?php echo htmlspecialchars($_GET["class"]); ?></h2>                                 
 
         <div align = "center">
             <form align = "center" class="forms">
                 <?php
-                if ($_GET["type"] == "membro" || $_GET["type"] == "subclasse") {                       //Se for Membro ou SubClasse usa formulário normal
+                //Se for Membro ou SubClasse usa formulário normal
+                if ($_GET["type"] == "membro" || $_GET["type"] == "subclasse") {                       
                     echo "<p align=\"right\"><b>Novo " . htmlspecialchars($_GET["type"]) . "</b></p>";
                     echo "<p align=\"left\">Label: <input type=\"text\" id=\"itemName\" style=\"width:427px\">";
                     echo "<br><br>";
                     echo "Descri&ccedil;&atilde;o: <input type=\"text\" id=\"itemDesc\" style=\"width:400px; height:150px;\">";
                     echo "<br><br>";
+                    
                     $Properties_link = "http://$_SERVER[HTTP_HOST]/index.php/getProperties";
                     $properties = file_get_contents($Properties_link);
+                    
                     echo "<table id=\"propriedades\" border=0 align=center>";
                     echo $properties;
-                    echo "</table><br>";
-                    //echo "<div class=\"props\" id=\"props\">";
-                    // A div é tratada pelo JavaScript para chamar as propriedades.
-                    //echo "</div></p>";		                
+                    echo "</table><br>";                   		                
                     echo "<button id=\"insertNewItem\">Inserir</button>";
                     echo "<button id=\"cancelNewItem\">Cancelar</button>";
                 } else if ($_GET["type"] == "propriedade") {
@@ -61,7 +62,6 @@
                     echo "<button id=\"cancelNewItem\">Fechar</button>";
                 }
                 ?>
-
             </form>
         </div>
 
@@ -93,6 +93,10 @@
                     var itemText = document.getElementById("itemName").value;               //Obtêm o texto presente na caixa de texto.
                     var itemDescription = document.getElementById("itemDesc").value;
                     var text = itemText.replace(/\s/g, "");                                 //Remove espaços.
+                    var id = null;
+                    var propriedade = null;
+                    var opcaoSelecionada = null;
+                    var tipoPropriedade = null;
 
                     if (itemText == '')                                                      //Se o texto obtido é vazio apresenta mensagem de erro.
                     {
@@ -100,30 +104,75 @@
                     }
                     else
                     {
-                        var url = "/index.php/insertData/" + type + "/" + text + "/" + classG;  //URL do metódo no controller que trata de inserções simples.
+                        var url = "/index.php/insertData/" + type + "/" + text + "/" + classG;  			//URL do metódo no controller que trata de inserções simples.
 
-                        //Inserção do individuo.
                         $.post(url, function(result)
                         {
-                            if (result == 1)                                                     //Se a inserção do individuo tiver sucesso
-                            {
-                                if (itemDescription != "")                                       //Se existir algo no campo Descrição.
+                            if (result == 1) {
+                                var url_2 = "/index.php/insertData/comentario/" + text + "/\"" + itemDescription + "\"";       //URL do metódo no controller que trata de inserções simples.			
+
+                                $.post(url_2, function(result)
                                 {
-                                    insertComment("comentario", text, "null", itemDescription); //Chamada do método que trata da inserção de comentários (ver no fim da página).
-                                }
-                                else
-                                {
-                                    window.alert("Mensagem: Insercao com sucesso!");
-                                    $.nmTop().close();                                          //Fechar janela modal.
-                                }
-                            }
-                            else
-                            {
-                                window.alert("Erro: Insercao sem sucesso!");
+                                    if (result == 1)
+                                    {
+                                        //Para todos os tr da tabela de propriedades
+                                        var all_tr_in_a_table = $("#propriedades tr");
+                                        $(all_tr_in_a_table).each(function() {
+                                            id = $(this).attr('id');
+                                            propriedade = $("#" + id + " #valor").attr('value');
+
+                                            //Para os td com selects
+                                            var all_selects_in_td = $("#" + id + " #range select");
+                                            $(all_selects_in_td).each(function() {
+                                                opcaoSelecionada = $(this).children("option").filter(":selected").text();
+                                                tipoPropriedade = $(this).children("option").filter(":selected").attr('id');
+                                                if (opcaoSelecionada != "" && opcaoSelecionada != "-") {
+                                                    var url2 = "/index.php/insertProperty/";
+                                                    if (type == "membro") {
+                                                        url2 = url2 + type + "/" + text + "/" + propriedade + "/" + opcaoSelecionada + "/null";
+                                                    } else {
+                                                        if (tipoPropriedade == "Classe") {
+                                                            url2 = url2 + "naoFixo/" + text + "/null/" + propriedade + "/" + opcaoSelecionada;
+                                                        } else if (tipoPropriedade == "Membro") {
+                                                            url2 = url2 + "fixo/" + text + "/null/" + propriedade + "/" + opcaoSelecionada;
+                                                        }
+                                                    }
+
+                                                    $.post(url2, function(result)
+                                                    {
+
+                                                    });
+                                                }
+                                            });
+
+                                            //Para os td com inputs (os das propriedades datatype)
+                                            var all_inputs_in_td = $("#" + id + " #range input");
+                                            $(all_inputs_in_td).each(function() {
+                                                opcaoSelecionada = $(this).val();
+                                                if (opcaoSelecionada != "" && opcaoSelecionada != "-") {
+                                                    var url2 = "/index.php/insertProperty/";
+                                                    if (type == "membro") {
+                                                        url2 = url2 + type + "/" + propriedade + "/" + opcaoSelecionada;
+                                                    } else {
+                                                        if (tipoPropriedade == "Classe") {
+                                                            url2 = url2 + "naoFixo/" + propriedade + "/" + opcaoSelecionada;
+                                                        } else if (tipoPropriedade == "Membro") {
+                                                            url2 = url2 + "fixo/" + propriedade + "/" + opcaoSelecionada;
+                                                        }
+                                                    }
+                                                    $.post(url2, function(result)
+                                                    {
+
+                                                    });
+                                                }
+                                            });
+                                        });
+                                        $.nmTop().close();
+                                    }
+                                });
                             }
                         });
                     }
-
                     return false;                                                                   //Retorna falso para impedir da página atualizar.
                 };
 
@@ -192,11 +241,11 @@
 
                     if (propSel == "novaPropriedade")
                     {
-                        var url = "/index.php/insertClass/novaPropriedade/?type=" + fortype;        //Endereço para a página que trata da nova propriedade.
+                        var url = "/index.php/insertClass/novaPropriedade/?type=" + fortype + "&element=" + classG;        //Endereço para a página que trata da nova propriedade.
                     }
                     else
                     {
-                        alert("INFO: Ainda nao implementado...");
+                        var url = "/index.php/insertClass/inserirPropriedade/?type=" + fortype + "&element=" + classG;
                     }
 
                     $.nmManual(url);
@@ -254,49 +303,7 @@
                 return data;
             }
 
-            function insertComment(type, classG, decoded, itemText)
-            {
-                var url_2 = "/index.php/insertData/" + type + "/" + classG + "/\"" + itemText + "\"";       //URL do metódo no controller que trata de inserções simples.			
 
-                if (decoded != "null")
-                {
-                    var url_1 = "/index.php/deleteData/" + type + "/" + classG + "/\"" + decoded + "\"";       //URL do metódo do controller que trata de eliminações simples.
-
-                    $.post(url_1, function(result)
-                    {
-                        if (result == 1)
-                        {
-                            $.post(url_2, function(result)
-                            {
-                                if (result == 1)
-                                {
-                                    window.alert("Mensagem: Insercao com sucesso!");
-                                    $.nmTop().close();
-                                }
-                                else
-                                {
-                                    window.alert("Erro: Insercao sem sucesso!");
-                                }
-                            });
-                        }
-                    });
-                }
-                else
-                {
-                    $.post(url_2, function(result)
-                    {
-                        if (result == 1)
-                        {
-                            window.alert("Mensagem: Insercao com sucesso!");
-                            $.nmTop().close();
-                        }
-                        else
-                        {
-                            window.alert("Erro: Insercao sem sucesso!");
-                        }
-                    });
-                }
-            }
 
             function botaoAdd(id) {
                 //$('#propriedades').append("<tr><td>xxxxxx</td></tr>");
@@ -304,7 +311,11 @@
                 $(all_tr_in_a_table).each(function() {
                     var parentID = $(this).attr('id');						//Vai buscar id do tr
                     if (parentID == id) {
-                        $("#"+id+" #range").append("<tr><td><select>" + $("#"+id+" #range select").html() + "</select></td></tr>");
+                        if ($("#" + id + " #range select").html() != null) {
+                            $("#" + id + " #range").append("<tr><td><select>" + $("#" + id + " #range select").html() + "</select></td></tr>");
+                        } else {
+                            $("#" + id + " #range").append("<tr><td><input type=\"text\" id=\"datatypeProperty\" style=\"width: 150px\"></td></tr>");
+                        }
                     }
                 });
             }

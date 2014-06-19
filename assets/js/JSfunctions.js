@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.4
+ * Versão 2.5
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -18,6 +18,9 @@
  * - removeSpaces                 Remove todos os espaços que possam existir na variável. 
  * - highlightElement             Ilumina o elemento da árvore de classes escolhido.
  * - elementVisibility            Esconde ou mostra um elemento da árvore de classes.
+ * - createPropertySelects        Cria as opções de escolha para cada propriedade.
+ * - getRangeRecursivo            Obtêm recursivamente todos os elementos do range de uma propriedade.
+ * - botaoAdd                     Adiciona mais um select (página de inserção de propriedades).
  * - consultMember                Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
  * - consultClass                 Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
  * - appendMembers                Adiciona a div de conteúdo os membros pertencentes à classe.
@@ -189,6 +192,97 @@ function elementVisibility(button)
     }
 }
 
+function createPropertySelects(element, type)
+{
+    //Variáveis utilizadas.
+    var parentID = $(element).attr('id');
+    var value = $('#' + parentID + '> #valor').attr('value');
+    var data_1 = null;
+    var data_2 = null;
+    var url_1 = "/index.php/getPropertyRange/" + value + "/1";
+    var url_2 = "/index.php/getPropertyRange/" + value + "/2";
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Obter a informação da função getPropertyRange.
+    if (obj)
+    {
+        data_1 = requestInformation(obj, url_1);
+        data_2 = requestInformation(obj, url_2);
+    }
+
+    if (data_1 == "DatatypeProperty")
+    {
+        $('#' + parentID).append("<td id=\"range\"><input type=\"text\" id=\"datatypeProperty\" style=\"width: 150px\"></td>");
+    }
+    else
+    {
+        var dataSubClasses = null;
+        var htmlRange = "<td id=\"range\"><select id=\"drop\">";
+        htmlRange = htmlRange + "<option id=\"Nenhum\" value=\"Nenhum\">-</option>";
+        if (type == "subclasse")
+        {
+            htmlRange = htmlRange + "<option id=\"Classe\" value=\"" + data_2 + "\">" + data_2 + "</option>";
+        }
+        htmlRange = htmlRange + getRecursiveRange(data_2, type, obj);
+        htmlRange = htmlRange + "</select></td>";
+        $('#' + parentID).append(htmlRange);
+    }
+
+    //alert(value);
+}
+
+function getRecursiveRange(subclasse, type, obj)
+{
+    //Variáveis utilizadas.
+    var url_1 = "/index.php/getMembers/" + subclasse + "/2";
+    var url_2 = "/index.php/selectSubClasses/" + subclasse;
+    var options = null;
+    var dataSubClasses = null;
+
+    if (obj)
+    {
+        //Obter a resposta dos URLs.
+        options = requestInformation(obj, url_1);
+        dataSubClasses = requestInformation(obj, url_2);
+
+        if (type == "subclasse")
+        {
+            options = options + dataSubClasses;
+        }
+
+        if (dataSubClasses != null)
+        {
+            var classes = dataSubClasses.split("\"");
+            var count = 7;
+            $.each(classes, function(index, chunk)
+            {
+                if (index == count)
+                {
+                    count = count + 4;
+                    options = options + getRecursiveRange(chunk, type, obj);
+                }
+            });
+        }
+
+        return options;
+    }
+}
+
+function botaoAdd(id)
+{
+    var all_tr_in_a_table = $("#propriedades tr");
+    $(all_tr_in_a_table).each(function()
+    {
+        var parentID = $(this).attr('id');
+        if (parentID == id)
+        {
+            $("#" + id + " #range").append("<tr><td><select>" + $("#" + id + " #range select").html() + "</select></td></tr>");
+        }
+    });
+}
+
 function consultMember(memberLabel)
 {
     //Variáveis utilizadas
@@ -305,25 +399,121 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
     }
 }
 
+function insertComment(elementName, comment)
+{
+    //Variáveis utilizadas.
+    var url_insertComment = "/index.php/insertData/comentario/" + elementName + "/\"" + comment + "\"";
+
+    //Eliminar comentário anterior caso exista.
+    deleteComment(elementName);
+
+    //Inserção do comentário.
+    $.post(url_insertComment, function(result)																//Elimina comentário antigo
+    {
+        if (result == 1)
+        {
+            window.alert("Mensagem: Insercao com sucesso!");
+        }
+        else
+        {
+            window.alert("Erro: Insercao sem sucesso!");
+        }
+    });
+}
+
+function insertProperty(table_element, element, type)
+{
+    //Variáveis utilizadas.
+    var parentID = $(table_element).attr('id');
+    var propriedade = $("#" + parentID + " #valor").attr('value');
+
+    //Para os td com selects.
+    var all_selects_in_td = $("#" + parentID + " #range select");
+
+    $(all_selects_in_td).each(function()
+    {
+        var opcaoSelecionada = $(this).children("option").filter(":selected").text();
+        var tipoPropriedade = $(this).children("option").filter(":selected").attr('id');
+        
+        if (opcaoSelecionada != "" && opcaoSelecionada != "-")
+        {
+            var url_1 = "/index.php/insertProperty/";
+            
+            if (type == "membro")
+            {
+                url_1 = url_1 + type + "/" + element + "/" + propriedade + "/" + opcaoSelecionada + "/null";
+            }
+            else
+            {
+                if (tipoPropriedade == "Classe")
+                {
+                    url_1 = url_1 + "naoFixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada;
+                }
+                else if (tipoPropriedade == "Membro")
+                {
+                    url_1 = url_1 + "fixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada;
+                }
+            }
+            $.post(url_1, function(result)
+            {
+                return(result);
+            });
+        }
+    });
+
+    //Para os td com inputs (os das propriedades datatype).
+//    var all_inputs_in_td = $("#" + parentID + " #range input");
+//    
+//    $(all_inputs_in_td).each(function() 
+//    {
+//        var opcaoSelecionada = $(this).val();
+//        
+//        if (opcaoSelecionada != "") 
+//        {
+//            var url_2 = "/index.php/insertProperty/";
+//            
+//            if (type == "membro") 
+//            {
+//                url_2 = url_2 + type + "/" + propriedade + "/" + opcaoSelecionada;
+//            } 
+//            else 
+//            {
+//                if (tipoPropriedade == "Classe") 
+//                {
+//                    url_2 = url_2 + "naoFixo/" + propriedade + "/" + opcaoSelecionada;
+//                } 
+//                else if (tipoPropriedade == "Membro") 
+//                {
+//                    url_2 = url_2 + "fixo/" + propriedade + "/" + opcaoSelecionada;
+//                }
+//            }
+//            $.post(url_2, function(result)
+//            {
+//                return(result);
+//            });
+//        }
+//    });
+}
+
 function insertNewProperty(step, propertyName, predicate, propertyType)
 {
     //Variáveis utilizadas.
-    url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore"; 
-    
+    url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore";
+
     $.post(url_insertNewProperty, function(aux)
     {
-        if(aux != 1)
+        if (aux != 1)
         {
             alert("Erro: Insercao de propriedade sem sucesso.");
         }
         else
         {
-            if(step == "novo2")
+            if (step == "novo2")
             {
                 alert("Erro: Insercao de propriedade com sucesso.");
             }
         }
-    });  
+    });
 }
 
 function deleteClass(classLabel, superClassLabel)
@@ -477,8 +667,8 @@ function createModalWindow(url, classParent, chamada)
         modal: true,
         sizes:
                 {
-                    minW: 500,
-                    minH: 600
+                    minW: 400,
+                    minH: 400
                 },
         callbacks:
                 {
@@ -517,8 +707,8 @@ function createModelessWindow(url)
         sizes:
                 {
                     minW: 500,
-                    minH: 600
-                },
+                    minH: 500
+                }
     });
     $.nmManual(url);
 
