@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 2.9
+ * Versão 3.0
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -30,6 +30,7 @@
  * 2.7 -> alteração da estrutura, criação de algumas funções privadas, descrição indicada em baixo.
  * 2.8 -> alterado a função insertData, para cada caso chama a função privada apropriada; adição das funções privadas. insertClass, insertMember, insertCommentary.
  * 2.9 -> adição da função selectSubClasses, descrição da função indicada em baixo.
+ * 3.0 -> adição da função privada readConfigFile, para permitir a leitura do endereço do servidor Fuseki apartir de um ficheiro .ini.
  * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -52,6 +53,7 @@
  * deteleData               -> eliminação de dados da ontologia.
  *
  * Funções Privadas:
+ * readConfigFile           -> carrega o endereço do servidor Fuseki apartir de um ficheiro .ini
  * insertClass              -> inserção de uma classe.
  * insertMember             -> inserção de um membro.
  * insertCommentary         -> inserção de um comentário.
@@ -76,8 +78,8 @@ error_reporting(0);         // -> Comentar isto para ativar as mensagens de erro
 class PESTI_Controller extends CI_Controller {
 
     //================= Variaveis Globais ===================//
-    protected $url_db_consult = "http://localhost:3030/data/sparql";            // -> endereço do Fuseki para consultas
-    protected $url_db_insert = "http://localhost:3030/data/update";             // -> endereço do Fuseki para inserções
+    protected $url_db_consult = "";             // -> endereço do Fuseki para consultas
+    protected $url_db_insert = "";              // -> endereço do Fuseki para inserções
     protected $properties_array = array();
 
     //================= Funções Públicas ====================//	
@@ -85,6 +87,7 @@ class PESTI_Controller extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('pesti_model');
+        $this->readConfigFile();
     }
 
     public function view($page = 'home') {
@@ -199,8 +202,8 @@ class PESTI_Controller extends CI_Controller {
 
         print_r($result);
     }
-    
-    public function selectSubClasses($classeMae){
+
+    public function selectSubClasses($classeMae) {
         /*
           SPARQL QUERY:
 
@@ -889,6 +892,47 @@ class PESTI_Controller extends CI_Controller {
     }
 
     //================= Funções Privadas ====================//
+
+    private function readConfigFile() {
+        //Definição das variáveis a serem usadas.
+        $configFile = 'configs/connections.ini';
+        $result = array();
+        $url_fuseki = '';
+
+        if (!file_exists($configFile)) {
+            print_r("<br><font color=\"red\"><b>Erro: O ficheiro de configura&ccedil;&atilde;o n&atilde;o foi encontrado na pasta configs!");
+            exit;
+        } else {
+            //Abrir o ficheiro para leitura.
+            $readFile = fopen($configFile, "r");
+
+            //Leitura até ao fim do ficheiro.
+            while (!feof($readFile)) {
+                //Obter a linha a ser processada.
+                $line = fgets($readFile);
+                //Ignorar comentários no ficheiro de configuração.
+                if (strpos($line, "Comentário") == false) {
+                    $result[] = $line;
+                }
+            }
+
+            //Fechar o ficheiro.
+            fclose($readFile);
+
+            //Remover o que não interessa.
+            foreach ($result as $line) {
+                $aux = explode("=", $line);
+
+                $url_fuseki = $url_fuseki . $aux[1];
+
+                //Remover possíveis espaços
+                $url_fuseki = preg_replace('/\s+/', '', $url_fuseki);
+            }
+
+            $this->url_db_consult = $url_fuseki . "/sparql";
+            $this->url_db_insert = $url_fuseki . "/update";
+        }
+    }
 
     private function insertClass($subject_uri, $object1_uri) {
         //Definição do predicado RDFS:subClassOf para a primeira inserção.

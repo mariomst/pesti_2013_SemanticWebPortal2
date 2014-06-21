@@ -32,7 +32,8 @@
 class PESTI_Model extends CI_Model {
 
     public function __construct() {
-        //pode ficar vazio
+        // Chamar o construtor do Model.
+        parent::__construct();
     }
 
     //================= Funções Públicas ====================//
