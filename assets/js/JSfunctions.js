@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.5
+ * Versão 2.6
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -11,6 +11,7 @@
  * Funções
  * - XMLHttpObject                Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
  * - requestInformation           Envia o pedido http ao controller e retorna o resultado do XSLT.
+ * - requestUpdate                Envia o pedido post ao controller para a inserção de informação.
  * - selectedElement              Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
  * - cleanDIV                     Apenas faz limpeza da informação contida numa DIV.
  * - constructClassTree           Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
@@ -19,16 +20,22 @@
  * - highlightElement             Ilumina o elemento da árvore de classes escolhido.
  * - elementVisibility            Esconde ou mostra um elemento da árvore de classes.
  * - createPropertySelects        Cria as opções de escolha para cada propriedade.
- * - getRangeRecursivo            Obtêm recursivamente todos os elementos do range de uma propriedade.
+ * - getRecursiveRange            Obtêm recursivamente todos os elementos do range de uma propriedade.
  * - botaoAdd                     Adiciona mais um select (página de inserção de propriedades).
  * - consultMember                Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
  * - consultClass                 Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
  * - appendMembers                Adiciona a div de conteúdo os membros pertencentes à classe.
  * - appendSubClasses             Adiciona a div de conteúdo as subclasses pertencentes à classe.
  * - appendProperties             Adiciona a div de conteúdo as propriedades associadas à classe.
+ * - insertClass                  Inserção de uma nova subclasse na classe indicada.
+ * - insertMember                 Inserção de um novo membro na classe indicada.
+ * - insertComment                Inserção do comentário no elemento indicado.
+ * - insertProperty               Inserção de propriedade no elemento indicado.
+ * - insertNewProperty            Inserção de uma nova propriedade.
  * - deleteClass                  Elimina classes e respectivas associações.
  * - deleteMember                 Elimina membros usando query simples.
  * - deleteComment                Elimina o comentário do elemento indicado.
+ * - deleteProperties             Elimina as propriedades associadas ao elemento.
  * - callFunctionsFromLink        Chama funcionalidades JS apartir de certos links existentes na página.
  * - createModalWindow            Chama as funcionalidades do nyroModal para criação de uma janela modal.
  * - createModelessWindow         Chama as funcionalidades do nyroModal para criação de uma janela modeless.
@@ -79,6 +86,35 @@ function requestInformation(obj, url)
     }
 
     return data;
+}
+
+function requestUpdate(obj, url)
+{
+    var result = null;
+
+    if (obj)
+    {
+        $.ajax({
+            url: url,
+            type: 'post',
+            dataType: 'html',
+            async: false,
+            success: function()
+            {
+                result = 1;
+            },
+            error: function()
+            {
+                result = 0;
+            }
+        });
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
 }
 
 function selectedElement(target)
@@ -399,6 +435,34 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
     }
 }
 
+function insertClass(classLabel, superClassLabel)
+{
+    //Variáveis utilizadas.
+    var url_insertClass = "/index.php/insertData/subclasse/" + classLabel + "/" + superClassLabel;
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção do comentário.
+    var update = requestUpdate(obj, url_insertClass);
+
+    return update;
+}
+
+function insertMember(memberLabel, ClassLabel)
+{
+    //Variáveis utilizadas.
+    var url_insertMember = "/index.php/insertData/membro/" + memberLabel + "/" + ClassLabel;
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção do comentário.
+    var update = requestUpdate(obj, url_insertMember);
+
+    return update;
+}
+
 function insertComment(elementName, comment)
 {
     //Variáveis utilizadas.
@@ -407,18 +471,13 @@ function insertComment(elementName, comment)
     //Eliminar comentário anterior caso exista.
     deleteComment(elementName);
 
-    //Inserção do comentário.
-    $.post(url_insertComment, function(result)																//Elimina comentário antigo
-    {
-        if (result == 1)
-        {
-            window.alert("Mensagem: Insercao com sucesso!");
-        }
-        else
-        {
-            window.alert("Erro: Insercao sem sucesso!");
-        }
-    });
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção do comentário.
+    var update = requestUpdate(obj, url_insertComment);
+
+    return update;
 }
 
 function insertProperty(table_element, element, type)
@@ -426,6 +485,10 @@ function insertProperty(table_element, element, type)
     //Variáveis utilizadas.
     var parentID = $(table_element).attr('id');
     var propriedade = $("#" + parentID + " #valor").attr('value');
+    var result = null;
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
 
     //Para os td com selects.
     var all_selects_in_td = $("#" + parentID + " #range select");
@@ -434,11 +497,11 @@ function insertProperty(table_element, element, type)
     {
         var opcaoSelecionada = $(this).children("option").filter(":selected").text();
         var tipoPropriedade = $(this).children("option").filter(":selected").attr('id');
-        
+
         if (opcaoSelecionada != "" && opcaoSelecionada != "-")
         {
             var url_1 = "/index.php/insertProperty/";
-            
+
             if (type == "membro")
             {
                 url_1 = url_1 + type + "/" + element + "/" + propriedade + "/" + opcaoSelecionada + "/null";
@@ -454,12 +517,13 @@ function insertProperty(table_element, element, type)
                     url_1 = url_1 + "fixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada;
                 }
             }
-            $.post(url_1, function(result)
-            {
-                return(result);
-            });
+            //Pedido POST para a inserção da propriedade.
+            var update = requestUpdate(obj, url_1);
         }
+        result = update;
     });
+
+    return result;
 
     //Para os td com inputs (os das propriedades datatype).
 //    var all_inputs_in_td = $("#" + parentID + " #range input");
@@ -498,45 +562,48 @@ function insertProperty(table_element, element, type)
 function insertNewProperty(step, propertyName, predicate, propertyType)
 {
     //Variáveis utilizadas.
-    url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore";
+    var url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore";
 
-    $.post(url_insertNewProperty, function(aux)
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção da propriedade.
+    var update = requestUpdate(obj, url_insertNewProperty);
+
+    if (update != 1)
     {
-        if (aux != 1)
+        alert("Erro: Insercao de propriedade sem sucesso.");
+    }
+    else
+    {
+        if (step == "novo2")
         {
-            alert("Erro: Insercao de propriedade sem sucesso.");
+            alert("Erro: Insercao de propriedade com sucesso.");
         }
-        else
-        {
-            if (step == "novo2")
-            {
-                alert("Erro: Insercao de propriedade com sucesso.");
-            }
-        }
-    });
+    }
 }
 
 function deleteClass(classLabel, superClassLabel)
 {
     //Variáveis utilizadas
-    url_membersList = "/index.php/getMembers/" + classLabel + "/3";
-    url_subClassesList = "/index.php/listSubClasses/" + classLabel;
-    url_deleteClass = "/index.php/deleteData/classe/" + classLabel + "/" + superClassLabel;
-    divCont = document.getElementById("content");
+    var url_membersList = "/index.php/getMembers/" + classLabel + "/3";
+    var url_subClassesList = "/index.php/listSubClasses/" + classLabel;
+    var url_deleteClass = "/index.php/deleteData/classe/" + classLabel + "/" + superClassLabel;
+    var divCont = document.getElementById("content");
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
-    obj = XMLHttpObject();
+    var obj = XMLHttpObject();
     //Obter a lista de subclasses da Classe seleccionada.
-    result_subClassesList = requestInformation(obj, url_subClassesList);
+    var result_subClassesList = requestInformation(obj, url_subClassesList);
     //Obter a lista de membros da Classe seleccionada.
-    result_membersList = requestInformation(obj, url_membersList);
+    var result_membersList = requestInformation(obj, url_membersList);
     //Obter o comentário da Classe seleccionada.
-    result_comment = requestInformation(obj, url_comment);
+    var result_comment = requestInformation(obj, url_comment);
 
     //Obter o tamanho da lista de subClasses.
-    subClassesList_length = $(result_subClassesList).find('li').length;
+    var subClassesList_length = $(result_subClassesList).find('li').length;
     //Obter o tamanho da lista de membros.
-    membersList_length = $(result_membersList).find('li').length;
+    var membersList_length = $(result_membersList).find('li').length;
 
     //Verifica se existem subclasses da Classe a ser eliminada.
     if (subClassesList_length != 0)
@@ -558,56 +625,60 @@ function deleteClass(classLabel, superClassLabel)
     //Apagar comentário associado a Classe
     deleteComment(classLabel);
 
-    $.post(url_deleteClass, function(result)
+    //Pedido POST para a eliminação da classe indicada.
+    var update = requestUpdate(obj, url_deleteClass);
+
+    if (update != 1)
     {
-        if (result != 1)
-        {
-            alert("Erro: Eliminacao da classe sem sucesso...");
-        }
-    });
+        alert("Erro: Eliminacao da classe sem sucesso...");
+    }
 }
 
 function deleteMember(memberLabel, classLabel)
 {
     //Variáveis utilizadas
-    url_deleteMember = "/index.php/deleteData/membro/" + memberLabel + "/" + classLabel;
-    divCont = document.getElementById("content");
+    var url_deleteMember = "/index.php/deleteData/membro/" + memberLabel + "/" + classLabel;
+    var divCont = document.getElementById("content");
 
-    $.post(url_deleteMember, function(result)
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a eliminação da classe indicada.
+    var update = requestUpdate(obj, url_deleteMember);
+
+    if (update != 1)
     {
-        //Se a eliminação do membro for bem sucedida.
-        if (result == 1)
-        {
-            //Eliminação do comentário associado ao membro.
-            deleteComment(memberLabel);
-        }
-        else
-        {
-            alert("Erro: Eliminacao do membro sem sucesso...");
-        }
-    });
+        alert("Erro: Eliminacao do membro sem sucesso...");
+    }
+    else
+    {
+        //Eliminação do comentário associado ao membro.
+        deleteComment(memberLabel);
+    }
 }
 
 function deleteComment(element)
 {
     //Variáveis utilizadas
-    url_deleteComment = "/index.php/deleteData/comentario/" + element + "/";
-    url_comment = "/index.php/getComment/" + element;
+    var url_deleteComment = "/index.php/deleteData/comentario/" + element + "/";
+    var url_comment = "/index.php/getComment/" + element;
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
-    obj = XMLHttpObject();
+    var obj = XMLHttpObject();
 
     //Obter o comentário (se existir) do elemento indicado.
-    comment = requestInformation(obj, url_comment);
-    convertString = $('<div>').html(comment).text();
+    var comment = requestInformation(obj, url_comment);
+    var convertString = $('<div>').html(comment).text();
 
     url_deleteComment = url_deleteComment + "\"" + convertString + "\"";
 
-    //Eliminação do comentário.
-    $.post(url_deleteComment, function(result)
+    //Pedido POST para a eliminação da classe indicada.
+    var update = requestUpdate(obj, url_deleteComment);
+
+    if (update != 1)
     {
-        return(result);
-    });
+        alert("Erro: Eliminacao do comentário sem sucesso...");
+    }
 }
 
 function deleteProperties(element)

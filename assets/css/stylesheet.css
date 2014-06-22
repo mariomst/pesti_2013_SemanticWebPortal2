@@ -28,7 +28,7 @@ h1
     text-align:center;
     padding:2px;
     text-decoration:none;
-    
+
 }
 .link_menu:hover,.link_menu:active
 {
@@ -45,8 +45,8 @@ h1
     border:1px solid black;
     margin-right:2em;
     padding-right:2em;
-	overflow-x: auto;
-	overflow-y: auto;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .content
@@ -54,10 +54,10 @@ h1
     margin-top:10px;
     margin-left:10px;
     float:right;
-	width:75%;
+    width:75%;
     height:98%;
-	overflow-x: auto;
-	overflow-y: auto;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .about
@@ -80,14 +80,14 @@ h1
 
 .forms
 {
-	border:2px solid #a1a1a1;
-	padding:10px 40px; 
-	background:#dddddd;
-	width:500px;
-	border-radius:25px;
-	box-shadow: 10px 10px 5px #888888;
-  	margin-left: auto ;
-  	margin-right: auto ;
+    border:2px solid #a1a1a1;
+    padding:10px 40px; 
+    background:#dddddd;
+    width:500px;
+    border-radius:25px;
+    box-shadow: 10px 10px 5px #888888;
+    margin-left: auto ;
+    margin-right: auto ;
 }
 
 .error_textbox
@@ -97,9 +97,9 @@ h1
 
 .propTypeDiv
 {
-	border:1px solid black;
-	margin-top:1em;
-	background-color:#FFFFFF
+    border:1px solid black;
+    margin-top:1em;
+    background-color:#FFFFFF
 }
 
 strong
@@ -120,5 +120,15 @@ span:hover
 
 table 
 {
-  border-spacing: 5px;
+    border-spacing: 5px;
+}
+
+textarea 
+{
+    resize: none;
+}
+
+.formfield *
+{
+    vertical-align: middle;
 }
