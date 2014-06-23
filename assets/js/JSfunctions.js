@@ -314,9 +314,17 @@ function botaoAdd(id)
         var parentID = $(this).attr('id');
         if (parentID == id)
         {
-            $("#" + id + " #range").append("<tr><td><select>" + $("#" + id + " #range select").html() + "</select></td></tr>");
+            $("#" + id + " #range").append("<tr><td><select>" + $("#" + id + " #range select").html() + "</select></td><td><button onclick=\"deleteSelect(this);return false;\"><img src=\"/assets/images/delete.png\" width=\"24px\" height=\"24px\"/></button></td></tr>");
         }
     });
+}
+
+function deleteSelect(element)
+{
+    //Obtêm o elemento 'span' mais perto do botão.
+    var selectElement = $(element).closest('tr');
+    
+    $(selectElement).remove();
 }
 
 function consultMember(memberLabel)
@@ -353,7 +361,7 @@ function consultClass(classLabel)
     //Variáveis utilizadas
     url_members = "/index.php/getMembers/" + classLabel + "/1";
     url_subclasses = "/index.php/getSubClasses/" + classLabel;
-    url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + classLabel + "&chamda=1";
+    url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + classLabel + "&chamada=1";
     url_insert_member = "/index.php/insertClass/?type=membro&class=" + classLabel + "&chamada=1";
     url_insert_subclass = "/index.php/insertClass/?type=subclasse&class=" + classLabel + "&chamada=1";
     url_insert_prop = "/index.php/insertClass/?type=propriedade&class=" + classLabel + "&chamada=1";
@@ -383,6 +391,42 @@ function consultClass(classLabel)
     appendMembers(obj, classLabel, url_insert_member, url_members);
     appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses);
     appendProperties(obj, classLabel, url_insert_prop, "", 1);
+}
+
+function consultProperty(propertyLabel)
+{
+    //Endereços utilizados.
+    var url_uri = "/index.php/printURI";
+    var url_range = "/index.php/getPropertyRange/" + propertyLabel + "/2";
+    var url_comment = "/index.php/getComment/" + propertyLabel;
+    var url_type = "" + propertyLabel;    
+    var url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + propertyLabel + "&chamada=1";
+    
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+    
+    //Obter a URI da propriedade seleccionada.
+    var result_uri = requestInformation(obj, url_uri);
+    //Obter o comentário da propriedade seleccionada.
+    var result_comment = requestInformation(obj, url_comment);
+    //Obter o range da propriedade seleccionada.
+    var result_range = requestInformation(obj, url_range);
+    
+    //Construção da DIV de conteúdo
+    $(".content").append("<h3>Informa&ccedil;&otilde;es relativa &agrave; propriedade: " + propertyLabel + "<h3>");
+    
+    $(".content").append("<b>URI</b>: <a href=\"" + result_uri + "#" + propertyLabel + "\" onclick=\"callFunctionsFromLink('" + propertyLabel + "',5);return false;\">" + result_uri + "#" + propertyLabel + "</a><br><br>");
+    
+    $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
+    
+    $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
+    $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
+
+    $(".content").append("<b>Range da propriedade " + propertyLabel + ":</b> " + result_range);
+    
+    $(".content").append("<br><br><b>URI</b>: <a href=\"" + result_uri + "#" + result_range + "\" onclick=\"callFunctionsFromLink('" + result_range + "',2);return false;\">" + result_uri + "#" + result_range + "</a><br><br>");
+    
+    $(".content").append("<b>Tipo da propriedade " + propertyLabel + ":</b> ");
 }
 
 function appendMembers(obj, classLabel, url_insert_member, url_members)
@@ -724,6 +768,12 @@ function callFunctionsFromLink(label, chamada)
         cleanDIV(divContent);
         consultClass(selectedClass);
     }
+    else if (chamada == "5")
+    {
+        //Atualização da div de conteúdo.
+        cleanDIV(divContent);
+        consultProperty(label);
+    }
     else
     {
         alert("Erro: Erro em chamar a funcao de consulta.");
@@ -757,11 +807,14 @@ function createModalWindow(url, classParent, chamada)
                         {
                             consultClass(classParent);
                         }
-                        else
+                        else if (chamada == 2)
                         {
                             consultMember(classParent);
                         }
-
+                        else
+                        {
+                            consultProperty(classParent);
+                        }
                     }
                 }
     });

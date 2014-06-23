@@ -51,12 +51,12 @@
                  <td>
                     <a> <!-- Vai mostrar a propriedade e o endereço vai ser o URI presente no XML e a acção é a chamada do consultMember -->
                         <xsl:attribute name="href">
-                            <xsl:value-of select="normalize-space(sp:binding[@name='valor'])"/>
+                            <xsl:value-of select="normalize-space(sp:binding[@name='Propriedade'])"/>
                         </xsl:attribute>
                         <xsl:attribute name="onclick">
                             <xsl:text>callFunctionsFromLink('</xsl:text>
-                                <xsl:value-of select="normalize-space(sp:binding[@name='Valor'])"/>
-                            <xsl:text>',2);return false;</xsl:text>
+                                <xsl:value-of select="normalize-space(sp:binding[@name='Propriedade'])"/>
+                            <xsl:text>',5);return false;</xsl:text>
                         </xsl:attribute>
                         <xsl:value-of select="normalize-space(sp:binding[@name='Propriedade'])"/>
                     </a>
