@@ -786,17 +786,22 @@ function createModalWindow(url, classParent, chamada)
     $.nmObj({
         forcetype: 'iframe',
         modal: true,
+        resize: true,
+        closeOnEscape: true,
         sizes:
                 {
-                    minW: 400,
-                    minH: 400
+                    inittW: 600,
+                    initH: 600,
+                    w: 600,
+                    h: 600,
+                    minW: 600,
+                    minH: 600
                 },
         callbacks:
                 {
                     afterClose: function()
                     {
                         var divCont = document.getElementById("content");
-                        var divMenu = document.getElementById("menu");
                         var element = $(".highlight").get();
                         //Actualizar a árvore de classes:
                         $(element).parent().find('ul').remove();
@@ -816,7 +821,12 @@ function createModalWindow(url, classParent, chamada)
                             consultProperty(classParent);
                         }
                     }
-                }
+                },
+        anim: 
+                {	
+                    def: true,				
+                    resize: true		
+                }                               
     });
     $.nmManual(url);
 

@@ -62,6 +62,7 @@ $route['getSubClasses/(:any)'] = 'pesti_controller/getSubClasses/$1';
 $route['getMembers/(:any)/(:any)'] = 'pesti_controller/getMembers/$1/$2';
 $route['getProperties'] = 'pesti_controller/getProperties';
 $route['getPropertyRange/(:any)/(:any)'] = 'pesti_controller/getPropertyRange/$1/$2';
+$route['getPropertyInfo/(:any)'] = 'pesti_controller/getPropertyInfo/$1';
 $route['getMemberProperty/(:any)'] = 'pesti_controller/getMemberProperty/$1';
 $route['getComment/(:any)'] = 'pesti_controller/getComment/$1';
 $route['selectSubClasses/(:any)'] = 'pesti_controller/selectSubClasses/$1';
