@@ -360,7 +360,8 @@ function consultClass(classLabel)
 {
     //Variáveis utilizadas
     url_members = "/index.php/getMembers/" + classLabel + "/1";
-    url_subclasses = "/index.php/getSubClasses/" + classLabel;
+    url_subclasses = "/index.php/getSubClasses/" + classLabel; 
+    url_properties = "/index.php/getClassProperty/" + classLabel;
     url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + classLabel + "&chamada=1";
     url_insert_member = "/index.php/insertClass/?type=membro&class=" + classLabel + "&chamada=1";
     url_insert_subclass = "/index.php/insertClass/?type=subclasse&class=" + classLabel + "&chamada=1";
@@ -390,7 +391,7 @@ function consultClass(classLabel)
     //Chamada de funções para cada secção do DIV
     appendMembers(obj, classLabel, url_insert_member, url_members);
     appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses);
-    appendProperties(obj, classLabel, url_insert_prop, "", 1);
+    appendProperties(obj, classLabel, url_insert_prop, url_properties, 1);
 }
 
 function consultProperty(propertyLabel)
@@ -399,7 +400,7 @@ function consultProperty(propertyLabel)
     var url_uri = "/index.php/printURI";
     var url_range = "/index.php/getPropertyRange/" + propertyLabel + "/2";
     var url_comment = "/index.php/getComment/" + propertyLabel;
-    var url_type = "" + propertyLabel;    
+    var url_info = "/index.php/getPropertyInfo/" + propertyLabel;    
     var url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + propertyLabel + "&chamada=1";
     
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
@@ -411,6 +412,8 @@ function consultProperty(propertyLabel)
     var result_comment = requestInformation(obj, url_comment);
     //Obter o range da propriedade seleccionada.
     var result_range = requestInformation(obj, url_range);
+    //Obter info da propriedade seleccionada.
+    var result_info = requestInformation(obj, url_info);
     
     //Construção da DIV de conteúdo
     $(".content").append("<h3>Informa&ccedil;&otilde;es relativa &agrave; propriedade: " + propertyLabel + "<h3>");
@@ -426,7 +429,9 @@ function consultProperty(propertyLabel)
     
     $(".content").append("<br><br><b>URI</b>: <a href=\"" + result_uri + "#" + result_range + "\" onclick=\"callFunctionsFromLink('" + result_range + "',2);return false;\">" + result_uri + "#" + result_range + "</a><br><br>");
     
-    $(".content").append("<b>Tipo da propriedade " + propertyLabel + ":</b> ");
+    $(".content").append("<b>Mais informa&ccedil;&otilde;es da propriedade: " + propertyLabel + ":</b><br><br>");
+    
+    $(".content").append(result_info);
 }
 
 function appendMembers(obj, classLabel, url_insert_member, url_members)

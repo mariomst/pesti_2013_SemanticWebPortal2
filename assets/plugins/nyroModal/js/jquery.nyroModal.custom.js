@@ -201,8 +201,8 @@ jQuery(function($, undefined) {
 			// Update sizes element to not go outsize the viewport.
 			// Will call 'size' callback filter
 			size: function() {
-				var maxHeight = this.getInternal().fullSize.viewH - this.sizes.hMargin,
-					maxWidth = this.getInternal().fullSize.viewW - this.sizes.wMargin;
+				var maxHeight = this.getInternal().fullSize.viewH - this.sizes.hMargin - 200,
+					maxWidth = this.getInternal().fullSize.viewW - this.sizes.wMargin - 200;
 				if (this.sizes.minW && this.sizes.minW > this.sizes.w)
 					this.sizes.w = this.sizes.minW;
 				if (this.sizes.minH && this.sizes.minH > this.sizes.h)
@@ -547,7 +547,7 @@ jQuery(function($, undefined) {
 						position: 'fixed',
 						width: this.sizes.w,
 						height: this.sizes.h,
-						top: (this.getInternal().fullSize.viewH - this.sizes.h - this.sizes.hMargin)/2,
+						top: ((this.getInternal().fullSize.viewH - this.sizes.h - this.sizes.hMargin)/2) - 100,
 						left: (this.getInternal().fullSize.viewW - this.sizes.w - this.sizes.wMargin)/2
 					});
 			},

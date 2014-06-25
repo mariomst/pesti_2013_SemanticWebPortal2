@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 3.0
+ * Versão 3.2
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -31,6 +31,7 @@
  * 2.8 -> alterado a função insertData, para cada caso chama a função privada apropriada; adição das funções privadas. insertClass, insertMember, insertCommentary.
  * 2.9 -> adição da função selectSubClasses, descrição da função indicada em baixo.
  * 3.0 -> adição da função privada readConfigFile, para permitir a leitura do endereço do servidor Fuseki apartir de um ficheiro .ini.
+ * 3.1 -> adição da função getPropertyInfo, que retorna o tipo e características da propriedade indicada.
  * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -43,8 +44,8 @@
  * getMembers               -> recebe um xml com todos os membros da classe indicada.
  * getProperties            -> recebe um xml com as propriedades existentes na ontologia.
  * getPropertyRange         -> recebe um xml com o range da propriedade dada.
- * getClassProperty_M1      -> recebe um xml com os nodos dos primeiros first e rest.
- * getClassProperty_M2      -> recebe um xml com os nodos first e rest e analisa-os.
+ * getPropertyInfo          -> recebe um xml com informações de uma dada propriedade.
+ * getClassProperty         -> recebe um xml com informações de algumas das propriedades da classe.
  * getMemberProperty        -> recebe um xml com as propriedades de um determinado membro.
  * printURI                 -> imprime a uri da ontolgia.
  * getCommentary            -> recebe o comentário associado ao elemento indicado.
@@ -80,7 +81,6 @@ class PESTI_Controller extends CI_Controller {
     //================= Variaveis Globais ===================//
     protected $url_db_consult = "";             // -> endereço do Fuseki para consultas
     protected $url_db_insert = "";              // -> endereço do Fuseki para inserções
-    protected $properties_array = array();
 
     //================= Funções Públicas ====================//	
 
@@ -479,201 +479,190 @@ class PESTI_Controller extends CI_Controller {
             }
         }
     }
-    
-    public function getPropertyInfo($property)
-    {
+
+    public function getPropertyInfo($property) {
         //Obter a URI completa e adicionar a variável $classeMae
         $ontologyURI = $this->getURI();
         $fullURI = '<' . $ontologyURI . '#' . $property . '>';
-        
+
         $query = 'PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#> ';
         $query = $query . 'PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
         $query = $query . 'PREFIX owl: <http://www.w3.org/2002/07/owl#> ';
-        $query = $query . 'select distinct '; 
+
+        $query = $query . 'select distinct ';
+        $query = $query . '(strafter(str(?prop), "#") AS ?Propriedade) ';
         $query = $query . '(strafter(str(?type), "#") AS ?Tipo) ';
         $query = $query . '(strafter(str(?char), "#") AS ?Caracteristicas) ';
         $query = $query . '(strafter(str(?prop2), "#") AS ?Propriedade2) ';
         $query = $query . '(strafter(str(?ran), "#") AS ?Range) ';
-        $query = $query . 'where{{{';
+
+        $query = $query . 'where{{{ ';
         $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty. ';
-	$query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-	$query = $query . $fullURI . ' rdf:range ?ran.';
-	$query = $query . '}UNION{';
-	$query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-	$query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-	$query = $query . $fullURI . ' rdfns:type owl:FunctionalProperty.';
-	$query = $query . 'BIND(owl:FunctionalProperty AS ?char).';
-	$query = $query . '}UNION{';
-	$query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-	$query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-	$query = $query . $fullURI . ' rdfns:type owl:TransitiveProperty.';
-	$query = $query . 'BIND(owl:TransitiveProperty AS ?char).';
-	$query = $query . '}UNION{';
-	$query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-	$query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-	$query = $query . $fullURI . ' rdfns:type owl:SymmetricProperty.';
-	$query = $query . 'BIND(owl:SymmetricProperty AS ?char).';
-	$query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-	$query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-	$query = $query . $fullURI . ' rdfns:type owl:AsymmetricProperty.';
-	$query = $query . 'BIND(owl:SymmetricProperty AS ?char).';
-	$query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-	$query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:InverseFunctionalProperty.';
-	$query = $query . 'BIND(owl:InverseFunctionalProperty AS ?char).';
-	$query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-        $query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-	$query = $query . $fullURI . ' rdfns:type owl:IrreflexiveProperty.';
-        $query = $query . 'BIND(owl:IrreflexiveProperty AS ?char).';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdf:range ?ran. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:FunctionalProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:TransitiveProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:SymmetricProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:AsymmetricProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:InverseFunctionalProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:IrreflexiveProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdfns:type owl:ReflexiveProperty.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' owl:inverseOf ?prop2.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' owl:equivalentProperty ?prop2.}. ';
+        $query = $query . 'FILTER NOT EXISTS{' . $fullURI . ' rdf:subPropertyOf ?prop2.}. ';
         $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-        $query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:ReflexiveProperty.';
-        $query = $query . 'BIND(owl:ReflexiveProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-        $query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-        $query = $query . $fullURI . ' owl:inverseOf ?prop2.';
-        $query = $query . 'BIND(owl:inverseOf AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-        $query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-        $query = $query . $fullURI . ' owl:equivalentProperty ?prop2.';
-        $query = $query . 'BIND(owl:equivalentProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:ObjectProperty.';
-        $query = $query . 'BIND(owl:ObjectProperty AS ?type).';
-        $query = $query . $fullURI . ' rdf:subPropertyOf ?prop2.';
-        $query = $query . 'BIND(rdf:subPropertyOf AS ?char).';
-        $query = $query . '}}UNION{{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:FunctionalProperty.';
-        $query = $query . 'BIND(owl:FunctionalProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:TransitiveProperty.';
-	$query = $query . 'BIND(owl:TransitiveProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:SymmetricProperty.';
-        $query = $query . 'BIND(owl:SymmetricProperty AS ?char).';
-	$query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:AsymmetricProperty.';
-        $query = $query . 'BIND(owl:SymmetricProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-	$query = $query . $fullURI . ' rdfns:type owl:InverseFunctionalProperty.';
-        $query = $query . 'BIND(owl:InverseFunctionalProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:IrreflexiveProperty.';
-        $query = $query . 'BIND(owl:IrreflexiveProperty AS ?char).';
-	$query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' rdfns:type owl:ReflexiveProperty.';
-        $query = $query . 'BIND(owl:ReflexiveProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-	$query = $query . $fullURI . ' owl:inverseOf ?prop2.';
-	$query = $query . 'BIND(owl:inverseOf AS ?char).';
-	$query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-        $query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-        $query = $query . $fullURI . ' owl:equivalentProperty ?prop2.';
-        $query = $query . 'BIND(owl:equivalentProperty AS ?char).';
-        $query = $query . '}UNION{';
-        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty.';
-	$query = $query . 'BIND(owl:DatatypeProperty AS ?type).';
-	$query = $query . $fullURI . ' rdf:subPropertyOf ?prop2.';
-	$query = $query . 'BIND(rdf:subPropertyOf AS ?char).}}}';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:FunctionalProperty. ';
+        $query = $query . 'BIND(owl:FunctionalProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION{FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:TransitiveProperty. ';
+        $query = $query . 'BIND(owl:TransitiveProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION{FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:SymmetricProperty. ';
+        $query = $query . 'BIND(owl:SymmetricProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:AsymmetricProperty. ';
+        $query = $query . 'BIND(owl:SymmetricProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:InverseFunctionalProperty. ';
+        $query = $query . 'BIND(owl:InverseFunctionalProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}}';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:IrreflexiveProperty. ';
+        $query = $query . 'BIND(owl:IrreflexiveProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:ReflexiveProperty. ';
+        $query = $query . 'BIND(owl:ReflexiveProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}}';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  owl:inverseOf ?prop2. ';
+        $query = $query . 'BIND(owl:inverseOf AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  owl:equivalentProperty ?prop2. ';
+        $query = $query . 'BIND(owl:equivalentProperty AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:ObjectProperty. ';
+        $query = $query . 'BIND(owl:ObjectProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdf:subPropertyOf ?prop2. ';
+        $query = $query . 'BIND(rdf:subPropertyOf AS ?char). ';
+        $query = $query . '{' . $fullURI . ' rdf:range ?ran.} ';
+        $query = $query . 'UNION {FILTER NOT EXISTS{' . $fullURI . ' rdf:range ?ran.}} ';
+        $query = $query . '}}UNION{{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:FunctionalProperty. ';
+        $query = $query . 'BIND(owl:FunctionalProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:TransitiveProperty. ';
+        $query = $query . 'BIND(owl:TransitiveProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . ' rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:SymmetricProperty. ';
+        $query = $query . 'BIND(owl:SymmetricProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:AsymmetricProperty. ';
+        $query = $query . 'BIND(owl:SymmetricProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:InverseFunctionalProperty. ';
+        $query = $query . 'BIND(owl:InverseFunctionalProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:IrreflexiveProperty. ';
+        $query = $query . 'BIND(owl:IrreflexiveProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdfns:type owl:ReflexiveProperty. ';
+        $query = $query . 'BIND(owl:ReflexiveProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  owl:inverseOf ?prop2. ';
+        $query = $query . 'BIND(owl:inverseOf AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  owl:equivalentProperty ?prop2. ';
+        $query = $query . 'BIND(owl:equivalentProperty AS ?char). ';
+        $query = $query . '}UNION{ ';
+        $query = $query . $fullURI . '  rdfns:type owl:DatatypeProperty. ';
+        $query = $query . 'BIND(owl:DatatypeProperty AS ?type). ';
+        $query = $query . $fullURI . '  rdf:subPropertyOf ?prop2. ';
+        $query = $query . 'BIND(rdf:subPropertyOf AS ?char). }}}';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
-        
-        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
-        
+
         //Ficheiro XSL a ser usado para a transformação do XML
-        //$xslfile = "http://localhost/assets/xsl/informacoes_propriedade.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        $xslfile = "http://localhost/assets/xsl/informacoes_propriedade.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        $result = $this->sendQuery($query, $xslfile);
 
-        //$result = $this->sendQuery($query, $xslfile);
-
-        print_r($xml);
+        print_r($result);
     }
 
-    public function getClassProperty_M1($classe) {
-        /*
-         * SPARQL QUERY:
-         */
-
+    public function getClassProperty($classe) {
         //Obter a URI completa e adicionar a variável $classe
         $ontologyURI = $this->getURI();
         $fullURI = '<' . $ontologyURI . '#' . $classe . '>';
 
-        //Construção da Query
-        $query = '';
-
+        $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ';
+        $query = $query . 'prefix owl: <http://www.w3.org/2002/07/owl#> ';
+        $query = $query . 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
+        $query = $query . 'prefix xml: <http://www.w3.org/2001/XMLSchema#> ';
+        $query = $query . 'SELECT (strafter(str(?onProperty), "#") AS ?Propriedade) (strafter(str(?someValuesFrom), "#") AS ?AlgunsValoresDe) ';
+        $query = $query . 'WHERE{ ';
+        $query = $query . $fullURI . ' rdfs:subClassOf ?blankNode. ';
+        $query = $query . '?blankNode owl:onProperty ?onProperty. ';
+        $query = $query . '{?blankNode owl:someValuesFrom ?someValuesFrom. FILTER (!isBlank(?someValuesFrom)). } ';
+        $query = $query . 'UNION  ';
+        $query = $query . '{?blankNode owl:onDataRange ?someValuesFrom. }}  ';
+        $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
+        
         //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = '';   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
 
         $result = $this->sendQuery($query, $xslfile);
 
-        //Obter todos os <span> do resultado
-        $span = explode("<span>", $result);
-
-        //Obter o first
-        $first_step1 = $span[1];
-        $first_step2 = explode("</span>", $first_step1);
-
-        //Obter o rest
-        $rest_step1 = $span[2];
-        $rest_step2 = explode("</span>", $rest_step1);
-
-        if ($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil') {
-            $this->getClassProperty_M2($first_step2, $rest_step2);
-        } else {
-            return $this->properties_array;
-        }
-    }
-
-    public function getClassProperty_M2($first, $rest) {
-        /*
-         * SPARQL QUERY:
-         */
-
-        //Construção da Query para analisar o first
-        $query = '';
-
-        //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = '';   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
-
-        $result = $this->sendQuery($query, $xslfile);
-
-        //Obter todos os <span> do resultado
-        $span = explode("<span>", $query);
-
-        //Obter o first
-        $first_step1 = $span[1];
-        $first_step2 = explode("</span>", $first_step1);
-
-        //Obter o rest
-        $rest_step1 = $span[2];
-        $rest_step2 = explode("</span>", $rest_step1);
-
-        if ($rest_step2 != 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil') {
-            $this->getClassProperty_M2($first_step2, $rest_step2);
-        } else {
-            return $this->properties_array;
-        }
+        print_r($result);
     }
 
     public function getMemberProperty($membro) {
