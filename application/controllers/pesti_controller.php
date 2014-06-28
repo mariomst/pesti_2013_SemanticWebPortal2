@@ -32,6 +32,7 @@
  * 2.9 -> adição da função selectSubClasses, descrição da função indicada em baixo.
  * 3.0 -> adição da função privada readConfigFile, para permitir a leitura do endereço do servidor Fuseki apartir de um ficheiro .ini.
  * 3.1 -> adição da função getPropertyInfo, que retorna o tipo e características da propriedade indicada.
+ * 3.2 -> adição das funções insertVisibilityProperty e deleteVisibilityProperty.
  * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -63,9 +64,11 @@
  * insertMemberProperty     -> inserção de propriedades em membros.
  * insertNewPropertyStep1   -> inserção do tipo de propriedade.
  * insertNewPropertyStep2   -> inserção dos elementos para o respectivo tipo de propriedade.
+ * insertVisibilityProperty -> inserção da propriedade temVisibilidade numa classe.
  * deleteClass              -> eliminação da classe.
  * deleteMember             -> eliminação do membro.
  * deleteCommentary         -> eliminação do comentário.
+ * deleteVisibilityProperty -> eliminação da propriedade temVisibilidade numa classe.
  * sendQuery                -> envio da query para o Fuseki (esse processo é tratado pelo modelo).
  * sendInsert               -> envio da query de inserção para o Fuseki (esse processo é tratado pelo modelo).
  * sendDelete               -> envio da query de eliminação para o Fuseki (esse processo é tratado pelo modelo).
@@ -656,7 +659,7 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . 'UNION  ';
         $query = $query . '{?blankNode owl:onDataRange ?someValuesFrom. }}  ';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
-        
+
         //Ficheiro XSL a ser usado para a transformação do XML
         $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
 
@@ -873,7 +876,14 @@ class PESTI_Controller extends CI_Controller {
             print_r($result);
 
             exit;
-        } else {
+        } else if($type == 'visibilidade') {            
+            //Chamada da função privada.
+            $result = $this->insertVisibilityPropertyValue($subject_uri, $object);
+            
+            print_r($result);
+            
+            exit;            
+        }else {
             print_r("Erro: Tipo n&atilde;o reconhecido...");
             exit;
         }
@@ -890,18 +900,6 @@ class PESTI_Controller extends CI_Controller {
             print_r("Erro: Ainda n&atilde;o desenvolvido...");
             exit;
         } else if ($type == 'naoFixo') {
-            /*
-             * SPARQL QUERY:
-             * 
-             * INSERT DATA
-             * {
-             *      ?classe rdfs:subClassOf _:foo
-             *      _:foo rdf:type owl:Restriction
-             *      _:foo owl:someValuesFrom ?range
-             *      _:foo owl:onProperty ?propriedade
-             * }
-             */
-
             //Chamada da função privada.
             $result = $this->insertNotFixedProperty($subject_uri, $object, $range);
 
@@ -909,17 +907,6 @@ class PESTI_Controller extends CI_Controller {
 
             exit;
         } else if ($type == 'membro') {
-            /*
-             * SPARQL QUERY:
-             * 
-             * INSERT DATA
-             * {
-             *      <subject_uri>       =>  membro
-             *      <predicate_uri>     =>  temX
-             *      <object_uri>        =>  valor
-             * }
-             */
-
             //Chamada da função privada.
             $result = $this->insertMemberProperty($subject_uri, $predicate, $object);
 
@@ -927,18 +914,6 @@ class PESTI_Controller extends CI_Controller {
             print_r($result);
             exit;
         } else if ($type == 'novo1') {
-            /*
-             * SPARQL QUERY:
-             * Inserção de uma propriedade do tipo ObjectProperty ou DatatypeProperty
-             * 
-             * INSERT DATA
-             * {
-             *      <subject_uri>
-             *      <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
-             *      <object_uri>
-             * }
-             */
-
             //Chamada da função privada.
             $result = $this->insertNewPropertyStep1($subject_uri, $object);
 
@@ -946,21 +921,15 @@ class PESTI_Controller extends CI_Controller {
             print_r($result);
             exit;
         } else if ($type == 'novo2') {
-            /*
-             * SPARQL QUERY:
-             * Inserção de tipos de FunctionalProperties
-             * 
-             * INSERT DATA
-             * {
-             *      <subject_uri>
-             *      <predicate_uri>
-             *      <object_uri>
-             * }
-             */
-
             //Chamada da função privada.
             $result = $this->insertNewPropertyStep2($subject_uri, $predicate, $object);
 
+            //Impressão do resultado.
+            print_r($result);
+            exit;
+        } else if ($type == 'visibilidade') {            
+           //Chamada da função privada.
+            $result = $this->insertVisibilityProperty();
             //Impressão do resultado.
             print_r($result);
             exit;
@@ -1001,6 +970,13 @@ class PESTI_Controller extends CI_Controller {
             //Eliminação de um comentário
             $result = $this->deleteCommentary($subject_uri, $object);
 
+            print_r($result);
+
+            exit;
+        } else if ($type == 'visibilidade') {
+            //Chamada da função privada.
+            $result = $this->deleteVisibilityPropertyValue($subject_uri, $object);
+            
             print_r($result);
 
             exit;
@@ -1104,6 +1080,18 @@ class PESTI_Controller extends CI_Controller {
     }
 
     private function insertNotFixedProperty($subject_uri, $object, $range) {
+        /*
+         * SPARQL QUERY:
+         * 
+         * INSERT DATA
+         * {
+         *      ?classe rdfs:subClassOf _:foo
+         *      _:foo rdf:type owl:Restriction
+         *      _:foo owl:someValuesFrom ?range
+         *      _:foo owl:onProperty ?propriedade
+         * }
+         */
+
         //Definição da URI da ontologia.
         $full_uri = $this->getURI();
         //Definição da URI do objecto.
@@ -1124,6 +1112,17 @@ class PESTI_Controller extends CI_Controller {
     }
 
     private function insertMemberProperty($subject_uri, $predicate, $object) {
+        /*
+         * SPARQL QUERY:
+         * 
+         * INSERT DATA
+         * {
+         *      <subject_uri>       =>  membro
+         *      <predicate_uri>     =>  temX
+         *      <object_uri>        =>  valor
+         * }
+         */
+
         //Definição da URI da ontologia.
         $full_uri = $this->getURI();
         //Criação da URI do predicado.
@@ -1138,6 +1137,18 @@ class PESTI_Controller extends CI_Controller {
     }
 
     private function insertNewPropertyStep1($subject_uri, $object) {
+        /*
+         * SPARQL QUERY:
+         * Inserção de uma propriedade do tipo ObjectProperty ou DatatypeProperty
+         * 
+         * INSERT DATA
+         * {
+         *      <subject_uri>
+         *      <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+         *      <object_uri>
+         * }
+         */
+
         //Definição da URI do predicado RDF:type.
         $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
         //Definição da URI do objecto.
@@ -1149,6 +1160,18 @@ class PESTI_Controller extends CI_Controller {
     }
 
     private function insertNewPropertyStep2($subject_uri, $predicate, $object) {
+        /*
+         * SPARQL QUERY:
+         * Inserção de tipos de FunctionalProperties
+         * 
+         * INSERT DATA
+         * {
+         *      <subject_uri>
+         *      <predicate_uri>
+         *      <object_uri>
+         * }
+         */
+
         //Verificação se o $predicate é do tipo "type" ou um dos seguintes.
         if ($predicate != "type") {
             //Definição da URI do objecto.
@@ -1176,6 +1199,76 @@ class PESTI_Controller extends CI_Controller {
         $result = $this->sendInsert($subject_uri, $predicate_uri, $object_uri);
 
         return $result;
+    }
+
+    private function insertVisibilityProperty() {
+        /*
+         * PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         * PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         * PREFIX owl: <http://www.w3.org/2002/07/owl#>
+         * PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+         * PREFIX myOWL: <http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl#>
+         * 
+         * INSERT DATA {
+         * myOWL:temVisibilidade rdf:type owl:DatatypeProperty.
+         * myOWL:temVisibilidade rdfs:range xsd:boolean.
+         * myOWL:temVisibilidade rdf:type owl:functionalProperty.
+         * }
+         */
+        
+        //Definição da URI da ontologia.
+        $uri = $this->getURI();
+        
+        //Definição da URI da propriedade temVisibilidade.
+        $temVisibilidade = "<" . $uri . "#temVisibilidade>";  
+        
+        //Construção dos argumentos para inserção do valor e propriedade na classe
+        $argumentos = $temVisibilidade . " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty>. ";
+        $argumentos = $argumentos . $temVisibilidade . " <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean>. ";
+        $argumentos = $argumentos . $temVisibilidade . " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#functionalProperty>";
+        
+        //Envio para a função insert_data_2 que recebe vários argumentos.
+        $result = $this->pesti_model->inserir_data_2($this->url_db_insert, $argumentos);
+
+        return $result;            
+    }
+    
+    private function insertVisibilityPropertyValue($subject_uri, $value) {
+        /*
+         * SPARQL Query
+         * 
+         * PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         * PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         * PREFIX owl: <http://www.w3.org/2002/07/owl#>
+         * PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+         * PREFIX myOWL: <http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl#>
+         * 
+         * INSERT DATA{
+         * myOWL:teste_temVisibilidade rdfs:subClassOf _:foo.
+         * _:foo rdf:type owl:Restriction.
+         * _:foo owl:onDataRange xsd:boolean.
+         * _:foo owl:onProperty myOWL:temVisibilidade.
+         * _:foo owl:qualifiedCardinality "TRUE" ^^xsd:boolean.
+         * }
+         */
+        
+        //Definição da URI da ontologia.
+        $uri = $this->getURI();
+        
+        //Definição da URI da propriedade temVisibilidade.
+        $temVisibilidade = "<" . $uri . "#temVisibilidade>";        
+        
+        //Construção dos argumentos para inserção do valor e propriedade na classe
+        $argumentos = $subject_uri . " <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:foo. ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction>. ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onDataRange> <http://www.w3.org/2001/XMLSchema#boolean>. ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onProperty> " . $temVisibilidade . ". ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#qualifiedCardinality> " . "\"" . $value . "\"" . "^^<http://www.w3.org/2001/XMLSchema#boolean>. ";
+        
+        //Envio para a função insert_data_2 que recebe vários argumentos.
+        $result = $this->pesti_model->inserir_data_2($this->url_db_insert, $argumentos);
+
+        return $result;        
     }
 
     private function deleteClass($subject_uri, $object1_uri) {
@@ -1219,6 +1312,26 @@ class PESTI_Controller extends CI_Controller {
         $predicate_uri = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#comment>";
 
         $result = $this->sendDelete($subject_uri, $predicate_uri, $object);
+
+        return $result;
+    }
+
+    private function deleteVisibilityPropertyValue($subject_uri, $value) {       
+        //Definição da URI da ontologia.
+        $uri = $this->getURI();
+        
+        //Definição da URI da propriedade temVisibilidade.
+        $temVisibilidade = "<" . $uri . "#temVisibilidade>";        
+        
+        //Construção da query para inserção do valor e propriedade na classe
+        $argumentos = $subject_uri . " <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:foo. ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction>. ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onDataRange> <http://www.w3.org/2001/XMLSchema#boolean>. ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onProperty> " . $temVisibilidade . ". ";
+        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#qualifiedCardinality> " . "\"" . $value . "\"" . "^^<http://www.w3.org/2001/XMLSchema#boolean>. ";
+        
+        //Envio para a função insert_data_2 que recebe vários argumentos.
+        $result = $this->pesti_model->eliminar_data_2($this->url_db_insert, $argumentos);
 
         return $result;
     }

@@ -9,36 +9,39 @@
  * - Marta Graça     1100640     1100640@isep.ipp.pt
  *
  * Funções
- * - XMLHttpObject                Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
- * - requestInformation           Envia o pedido http ao controller e retorna o resultado do XSLT.
- * - requestUpdate                Envia o pedido post ao controller para a inserção de informação.
- * - selectedElement              Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
- * - cleanDIV                     Apenas faz limpeza da informação contida numa DIV.
- * - constructClassTree           Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
- * - getSubClasses                Recebe como parâmetro o nome da classe, faz um pedido de pesquisa de todas as subclasses pertencentes a ela e retorna o resultado em forma de lista.
- * - removeSpaces                 Remove todos os espaços que possam existir na variável. 
- * - highlightElement             Ilumina o elemento da árvore de classes escolhido.
- * - elementVisibility            Esconde ou mostra um elemento da árvore de classes.
- * - createPropertySelects        Cria as opções de escolha para cada propriedade.
- * - getRecursiveRange            Obtêm recursivamente todos os elementos do range de uma propriedade.
- * - botaoAdd                     Adiciona mais um select (página de inserção de propriedades).
- * - consultMember                Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
- * - consultClass                 Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
- * - appendMembers                Adiciona a div de conteúdo os membros pertencentes à classe.
- * - appendSubClasses             Adiciona a div de conteúdo as subclasses pertencentes à classe.
- * - appendProperties             Adiciona a div de conteúdo as propriedades associadas à classe.
- * - insertClass                  Inserção de uma nova subclasse na classe indicada.
- * - insertMember                 Inserção de um novo membro na classe indicada.
- * - insertComment                Inserção do comentário no elemento indicado.
- * - insertProperty               Inserção de propriedade no elemento indicado.
- * - insertNewProperty            Inserção de uma nova propriedade.
- * - deleteClass                  Elimina classes e respectivas associações.
- * - deleteMember                 Elimina membros usando query simples.
- * - deleteComment                Elimina o comentário do elemento indicado.
- * - deleteProperties             Elimina as propriedades associadas ao elemento.
- * - callFunctionsFromLink        Chama funcionalidades JS apartir de certos links existentes na página.
- * - createModalWindow            Chama as funcionalidades do nyroModal para criação de uma janela modal.
- * - createModelessWindow         Chama as funcionalidades do nyroModal para criação de uma janela modeless.
+ * - XMLHttpObject                  Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+ * - requestInformation             Envia o pedido http ao controller e retorna o resultado do XSLT.
+ * - requestUpdate                  Envia o pedido post ao controller para a inserção de informação.
+ * - selectedElement                Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
+ * - cleanDIV                       Apenas faz limpeza da informação contida numa DIV.
+ * - constructClassTree             Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
+ * - getSubClasses                  Recebe como parâmetro o nome da classe, faz um pedido de pesquisa de todas as subclasses pertencentes a ela e retorna o resultado em forma de lista.
+ * - removeSpaces                   Remove todos os espaços que possam existir na variável. 
+ * - highlightElement               Ilumina o elemento da árvore de classes escolhido.
+ * - elementVisibility              Esconde ou mostra um elemento da árvore de classes.
+ * - createPropertySelects          Cria as opções de escolha para cada propriedade.
+ * - getRecursiveRange              Obtêm recursivamente todos os elementos do range de uma propriedade.
+ * - botaoAdd                       Adiciona mais um select (página de inserção de propriedades).
+ * - consultMember                  Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
+ * - consultClass                   Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
+ * - appendMembers                  Adiciona a div de conteúdo os membros pertencentes à classe.
+ * - appendSubClasses               Adiciona a div de conteúdo as subclasses pertencentes à classe.
+ * - appendProperties               Adiciona a div de conteúdo as propriedades associadas à classe.
+ * - insertClass                    Inserção de uma nova subclasse na classe indicada.
+ * - insertMember                   Inserção de um novo membro na classe indicada.
+ * - insertComment                  Inserção do comentário no elemento indicado.
+ * - insertProperty                 Inserção de propriedade no elemento indicado.
+ * - insertNewProperty              Inserção de uma nova propriedade.
+ * - insertVisibilityProperty       Inserção da propriedade temVisibilidade na ontologia.
+ * - insertVisibilityPropertyValue  Inserção do valor da propriedade temVisibilidade na classe indicada.
+ * - deleteClass                    Elimina classes e respectivas associações.
+ * - deleteMember                   Elimina membros usando query simples.
+ * - deleteComment                  Elimina o comentário do elemento indicado.
+ * - deleteProperties               Elimina as propriedades associadas ao elemento.
+ * - deleteVisibilityPropertyValue  Elimina do valor da propriedade temVisibilidade na classe indicada.
+ * - callFunctionsFromLink          Chama funcionalidades JS apartir de certos links existentes na página.
+ * - createModalWindow              Chama as funcionalidades do nyroModal para criação de uma janela modal.
+ * - createModelessWindow           Chama as funcionalidades do nyroModal para criação de uma janela modeless.
  */
 
 //Variaveis Globais:
@@ -218,13 +221,19 @@ function elementVisibility(button)
     //Verifica se o elemento esta ou não visível.
     if ($(listElement).is(":visible"))
     {
-        $(listElement).hide();
-        $(button).find('img').attr('src', "/assets/images/eye_closed.png");
+        //$(listElement).hide();
+        //$(button).find('img').attr('src', "/assets/images/eye_closed.png");
+        //Remove (caso esteja associada a classe) a propriedade temVisibilidade.
+        var delResult = deleteVisibilityPropertyValue($(listElement).text(), "TRUE");
+        var insResult = insertVisibilityPropertyValue($(listElement).text(), "FALSE");
     }
     else
     {
-        $(listElement).show();
-        $(button).find('img').attr('src', "/assets/images/eye_open.png");
+        //$(listElement).show();
+        //$(button).find('img').attr('src', "/assets/images/eye_open.png");
+        //Remove (caso esteja associada a classe) a propriedade temVisibilidade.
+        var delResult = deleteVisibilityPropertyValue($(listElement).text(), "FALSE");
+        var insResult = insertVisibilityPropertyValue($(listElement).text(), "TRUE");
     }
 }
 
@@ -323,7 +332,7 @@ function deleteSelect(element)
 {
     //Obtêm o elemento 'span' mais perto do botão.
     var selectElement = $(element).closest('tr');
-    
+
     $(selectElement).remove();
 }
 
@@ -360,7 +369,7 @@ function consultClass(classLabel)
 {
     //Variáveis utilizadas
     url_members = "/index.php/getMembers/" + classLabel + "/1";
-    url_subclasses = "/index.php/getSubClasses/" + classLabel; 
+    url_subclasses = "/index.php/getSubClasses/" + classLabel;
     url_properties = "/index.php/getClassProperty/" + classLabel;
     url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + classLabel + "&chamada=1";
     url_insert_member = "/index.php/insertClass/?type=membro&class=" + classLabel + "&chamada=1";
@@ -400,12 +409,12 @@ function consultProperty(propertyLabel)
     var url_uri = "/index.php/printURI";
     var url_range = "/index.php/getPropertyRange/" + propertyLabel + "/2";
     var url_comment = "/index.php/getComment/" + propertyLabel;
-    var url_info = "/index.php/getPropertyInfo/" + propertyLabel;    
+    var url_info = "/index.php/getPropertyInfo/" + propertyLabel;
     var url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + propertyLabel + "&chamada=1";
-    
+
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
-    
+
     //Obter a URI da propriedade seleccionada.
     var result_uri = requestInformation(obj, url_uri);
     //Obter o comentário da propriedade seleccionada.
@@ -414,23 +423,23 @@ function consultProperty(propertyLabel)
     var result_range = requestInformation(obj, url_range);
     //Obter info da propriedade seleccionada.
     var result_info = requestInformation(obj, url_info);
-    
+
     //Construção da DIV de conteúdo
     $(".content").append("<h3>Informa&ccedil;&otilde;es relativa &agrave; propriedade: " + propertyLabel + "<h3>");
-    
+
     $(".content").append("<b>URI</b>: <a href=\"" + result_uri + "#" + propertyLabel + "\" onclick=\"callFunctionsFromLink('" + propertyLabel + "',5);return false;\">" + result_uri + "#" + propertyLabel + "</a><br><br>");
-    
+
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
-    
+
     $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
     $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
 
     $(".content").append("<b>Range da propriedade " + propertyLabel + ":</b> " + result_range);
-    
+
     $(".content").append("<br><br><b>URI</b>: <a href=\"" + result_uri + "#" + result_range + "\" onclick=\"callFunctionsFromLink('" + result_range + "',2);return false;\">" + result_uri + "#" + result_range + "</a><br><br>");
-    
+
     $(".content").append("<b>Mais informa&ccedil;&otilde;es da propriedade: " + propertyLabel + ":</b><br><br>");
-    
+
     $(".content").append(result_info);
 }
 
@@ -632,6 +641,34 @@ function insertNewProperty(step, propertyName, predicate, propertyType)
     }
 }
 
+function insertVisibilityProperty()
+{
+    //Endereço para chamada da função do controller.
+    var url_insertVisibilityProperty = "/index.php/insertProperty/visibilidade/null/null/null/null";
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção da propriedade temVisibilidade.
+    var update = requestUpdate(obj, url_insertVisibilityProperty);
+
+    return update;
+}
+
+function insertVisibilityPropertyValue(element, value)
+{
+    //Endereço para chamada da função do controller.
+    var url_insertVisibilityProperty = "/index.php/insertData/visibilidade/" + element + "/" + value;   
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção da propriedade temVisibilidade.
+    var update = requestUpdate(obj, url_insertVisibilityProperty);
+
+    return update;
+}
+
 function deleteClass(classLabel, superClassLabel)
 {
     //Variáveis utilizadas
@@ -735,6 +772,20 @@ function deleteProperties(element)
     //Ainda não desenvolvido...
 }
 
+function deleteVisibilityPropertyValue(element, value)
+{
+    //Endereço para chamada da função do controller.
+    var url_deleteVisibilityProperty = "index.php/deleteData/visibilidade/" + element + "/" + value;
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a eliminação da classe indicada.
+    var update = requestUpdate(obj, url_deleteVisibilityProperty);
+
+    return update;
+}
+
 function callFunctionsFromLink(label, chamada)
 {
     var divContent = document.getElementById("content");
@@ -765,6 +816,10 @@ function callFunctionsFromLink(label, chamada)
         //Atualização da div de conteúdo.
         cleanDIV(divContent);
         consultClass(selectedClass);
+        var element = $(".highlight").get();
+        //Actualizar a árvore de classes:
+        $(element).parent().find('ul').remove();
+        getSubClasses(element);
     }
     else if (chamada == "4")
     {
@@ -827,11 +882,11 @@ function createModalWindow(url, classParent, chamada)
                         }
                     }
                 },
-        anim: 
-                {	
-                    def: true,				
-                    resize: true		
-                }                               
+        anim:
+                {
+                    def: true,
+                    resize: true
+                }
     });
     $.nmManual(url);
 

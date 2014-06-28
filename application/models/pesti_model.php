@@ -23,6 +23,7 @@
  * inserir_data     ->  Insere data na TDB usando uma query de inserção simples.
  * inserir_data_2   ->  Insere data na TDB usando uma query com vários argumentos.
  * eliminar_data    ->  Elimina data da TDB usando uma query de eliminação simples.
+ * eliminar_data_2  ->  Elimina data na TDB usando uma query com vários argumentos.
  *
  * Funções Privadas:
  * executar_consulta  ->  Faz um pedido SPARQL ao servidor Fuseki para retornar a resposta da query enviada.
@@ -64,6 +65,14 @@ class PESTI_Model extends CI_Model {
 
     public function eliminar_data($url_db, $sujeito, $predicado, $objecto) {
         $query = "update=DELETE DATA {" . $sujeito . $predicado . $objecto . "}";
+
+        $result = $this->executar_update($url_db, $query);
+
+        return $result;
+    }
+     
+    public function eliminar_data_2($url_db, $argumentos) {
+        $query = "update=DELETE DATA {" . $argumentos . "}";
 
         $result = $this->executar_update($url_db, $query);
 

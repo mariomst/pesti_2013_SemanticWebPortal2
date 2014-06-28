@@ -12,6 +12,7 @@
     <script>
         $(window).ready(function()
         {
+            insertVisibilityProperty();
             constructClassTree('#menu');
         });
     </script>
