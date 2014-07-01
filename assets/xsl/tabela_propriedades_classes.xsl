@@ -56,7 +56,13 @@
                     <img src="/assets/images/magnifying_glass.png" width="24px" height="24px"/>
                 </button>
                 <button>
-                    <xsl:attribute name="onclick">testes()</xsl:attribute>
+                    <xsl:attribute name="onclick">
+                        <xsl:text>callFunctionsforProperties('classe','</xsl:text>
+                        <xsl:value-of select="normalize-space(sp:binding[@name='Propriedade'])"/>
+                        <xsl:text>','</xsl:text>
+                        <xsl:value-of select="normalize-space(sp:binding[@name='AlgunsValoresDe'])"/>
+                        <xsl:text>');</xsl:text>
+                    </xsl:attribute>
                     <img src="/assets/images/delete.png" width="24px" height="24px"/>
                 </button>
             </td>

@@ -50,13 +50,14 @@ $route['insertClass/(:any)'] = 'pesti_controller/viewInsertClass/$1';
 
 //Páginas De Inserção de Dados na Ontologia
 $route['insertData/(:any)/(:any)/(:any)'] = 'pesti_controller/insertData/$1/$2/$3';
-$route['insertProperty/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_controller/insertProperty/$1/$2/$3/$4/$5';
+$route['insertProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_controller/insertProperty/$1/$2/$3/$4/$5/$6';
 
 //Páginas De Eliminação de Dados na Ontologia
 $route['deleteData/(:any)/(:any)/(:any)'] = 'pesti_controller/deleteData/$1/$2/$3';
+$route['deleteProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_controller/deleteProperty/$1/$2/$3/$4/$5/$6';
 
 //Páginas De listar informação da Ontologia
-$route['listClasses'] = 'pesti_controller/listClasses';
+$route['listClasses/(:any)'] = 'pesti_controller/listClasses/$1';
 $route['listSubClasses/(:any)'] = 'pesti_controller/listSubClasses/$1';
 $route['getSubClasses/(:any)'] = 'pesti_controller/getSubClasses/$1';
 $route['getMembers/(:any)/(:any)'] = 'pesti_controller/getMembers/$1/$2';

@@ -15,20 +15,26 @@
 
     <xsl:template match="sp:result">
         <xsl:variable name="type" select="generate-id()"/>
+		
+		<xsl:variable name="caracteristica">
+			<xsl:value-of select="normalize-space(sp:binding[@name='Caracteristica'])"/>
+		</xsl:variable>
 
         <tr>
             <xsl:attribute name="id">
                 <xsl:value-of select="$type"/>
             </xsl:attribute>
             <td>
-                <button>
-                    <xsl:attribute name="onclick">
-                        <xsl:text>botaoAdd('</xsl:text>
-                        <xsl:value-of select="$type"/>
-                        <xsl:text>');return false;</xsl:text>
-                    </xsl:attribute>
-                    <img src="/assets/images/add.png" width="24px" height="24px"/>
-                </button>
+				<xsl:if test="$caracteristica != 'FunctionalProperty'">
+					<button>
+						<xsl:attribute name="onclick">
+							<xsl:text>botaoAdd('</xsl:text>
+							<xsl:value-of select="$type"/>
+							<xsl:text>');return false;</xsl:text>
+						</xsl:attribute>
+						<img src="/assets/images/add.png" width="24px" height="24px"/>
+					</button>
+				</xsl:if>
             </td>
             <td id="valor">
                 <xsl:attribute name="value">

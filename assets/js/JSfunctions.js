@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.6
+ * Versão 2.7
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -40,12 +40,15 @@
  * - deleteProperties               Elimina as propriedades associadas ao elemento.
  * - deleteVisibilityPropertyValue  Elimina do valor da propriedade temVisibilidade na classe indicada.
  * - callFunctionsFromLink          Chama funcionalidades JS apartir de certos links existentes na página.
+ * - callFunctionsforProperties     Chama funcionalidades JS apartir de certos links existentes na página.
  * - createModalWindow              Chama as funcionalidades do nyroModal para criação de uma janela modal.
  * - createModelessWindow           Chama as funcionalidades do nyroModal para criação de uma janela modeless.
  */
 
 //Variaveis Globais:
 var selectedClass = "null";
+var selectedMember = "null";
+var todosElementos = "null";
 
 //Funções
 function XMLHttpObject()
@@ -162,7 +165,7 @@ function constructClassTree(target)
     obj = XMLHttpObject();
 
     //URL da função existente no Controller. 
-    url_Classes = "/index.php/listClasses";
+    url_Classes = "/index.php/listClasses/1";
 
     //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
     result = requestInformation(obj, url_Classes);
@@ -257,22 +260,71 @@ function createPropertySelects(element, type)
         data_2 = requestInformation(obj, url_2);
     }
 
-    if (data_1 == "DatatypeProperty")
+    //alert("1-" + data_1 + " 2-" + data_2);
+    var data_3 = data_1.split("-");
+
+    //Se a propriedade é datatype
+    if (data_3[0] == "DatatypeProperty")
     {
-        $('#' + parentID).append("<td id=\"range\"><input type=\"text\" id=\"datatypeProperty\" style=\"width: 150px\"></td>");
+        //Se a propriedade nao tem range
+        if (data_3[1] == "") {
+            $('#' + parentID).append("<td id=\"range\"><input type=\"text\" id=\"datatypeProperty\" style=\"width: 150px\"></td><td id=\"range2\"><select id=\"range2\"><option>decimal</option><option>integer</option><option>long</option><option>unsignedLong</option><option>nonPositiveInteger</option><option>nonNegativeInteger</option><option>negativeInteger</option><option>positiveInteger</option><option>int</option><option>unsignedInt</option><option>short</option><option>unsignedShort</option><option>byte</option><option>unsignedByte</option><option>float</option><option>double</option><option>hexBinary</option><option>base64Binary</option><option>duration</option><option>dateTime</option><option>time</option><option>date</option><option>gYearMonth</option><option>gYear</option><option>gMonthDay</option><option>gDay</option><option>gMonth</option><option>boolean</option><option>anyURI</option><option>QName</option><option>NOTATION</option><option>string</option><option>normalizedString</option><option>token</option><option>language</option><option>Name</option><option>NCName</option><option>ID</option><option>IDREF</option><option>IDREFS</option><option>ENTITY</option><option>ENTITIES</option><option>NMTOKEN</option><option>NMTOKENS</option></select></td>");
+        } else {	//Se a propriedade tem range
+            $('#' + parentID).append("<td id=\"range\"><input type=\"text\" id=\"datatypeProperty\" style=\"width: 150px\"></td>  <td id=\"range3\" value=\"" + data_3[1] + "\">" + data_3[1] + "</td>");
+        }
     }
     else
     {
-        var dataSubClasses = null;
-        var htmlRange = "<td id=\"range\"><select id=\"drop\">";
-        htmlRange = htmlRange + "<option id=\"Nenhum\" value=\"Nenhum\">-</option>";
-        if (type == "subclasse")
-        {
-            htmlRange = htmlRange + "<option id=\"Classe\" value=\"" + data_2 + "\">" + data_2 + "</option>";
+        //Se a propriedade não tiver range
+        if (data_2 == "") {
+            //Se for a primeira vez que está a ir buscar todos os elementos, guarda numa variável para da próxima vez não ter de fazer imensas vezes o mesmo pedido ao fuseki
+            if (todosElementos == null) {
+                var dataSubClasses = null;
+                var htmlRange = "<td id=\"range\"><select id=\"drop\">";
+                htmlRange = htmlRange + "<option id=\"Nenhum\" value=\"Nenhum\">-</option>";
+                var url_4 = "/index.php/listClasses/2";
+                var data_4 = null;
+
+                if (obj)
+                {
+                    data_4 = requestInformation(obj, url_4);
+                }
+
+                var all_pp = null;
+                var all_p = data_4.split("<p>");
+
+                for (i = 0; i < all_p.length; i++) {//Para cada top classe
+                    if (i == 1) {
+                        all_pp = all_p[i].split("</p>");
+                        //alert(all_p[i]);
+                        //alert(all_pp[0]);
+                        if (type == "subclasse")
+                        {
+                            htmlRange = htmlRange + "<option id=\"Classe\" value=\"" + all_pp[0] + "\">" + all_pp[0] + "</option>";
+                        }
+                        //Vai buscar todos os elementos dentro da top classe
+                        htmlRange = htmlRange + getRecursiveRange(all_pp[0], type, obj);
+                    }
+                }
+
+                htmlRange = htmlRange + "</select></td>";
+                $('#' + parentID).append(htmlRange);
+                todosElementos = htmlRange;
+            } else {
+                $('#' + parentID).append(todosElementos);
+            }
+        } else {	//Se a propriedade tiver range
+            var dataSubClasses = null;
+            var htmlRange = "<td id=\"range\"><select id=\"drop\">";
+            htmlRange = htmlRange + "<option id=\"Nenhum\" value=\"Nenhum\">-</option>";
+            if (type == "subclasse")
+            {
+                htmlRange = htmlRange + "<option id=\"Classe\" value=\"" + data_2 + "\">" + data_2 + "</option>";
+            }
+            htmlRange = htmlRange + getRecursiveRange(data_2, type, obj);
+            htmlRange = htmlRange + "</select></td>";
+            $('#' + parentID).append(htmlRange);
         }
-        htmlRange = htmlRange + getRecursiveRange(data_2, type, obj);
-        htmlRange = htmlRange + "</select></td>";
-        $('#' + parentID).append(htmlRange);
     }
 
     //alert(value);
@@ -351,6 +403,8 @@ function consultMember(memberLabel)
     result_uri = requestInformation(obj, url_uri);
     //Obter o comentário do membro seleccionado.
     result_comment = requestInformation(obj, url_comment);
+
+    selectedMember = memberLabel;
 
     //Construção da DIV de conteúdo
     $(".content").append("<h3>Informa&ccedil;&otilde;es relativa ao membro: " + memberLabel + "<h3>");
@@ -562,23 +616,66 @@ function insertProperty(table_element, element, type)
 
             if (type == "membro")
             {
-                url_1 = url_1 + type + "/" + element + "/" + propriedade + "/" + opcaoSelecionada + "/null";
+                url_1 = url_1 + type + "/" + element + "/" + propriedade + "/" + opcaoSelecionada + "/null/null";
             }
             else
             {
                 if (tipoPropriedade == "Classe")
                 {
-                    url_1 = url_1 + "naoFixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada;
+                    url_1 = url_1 + "naoFixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada + "/null";
                 }
                 else if (tipoPropriedade == "Membro")
                 {
-                    url_1 = url_1 + "fixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada;
+                    url_1 = url_1 + "fixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada + "/null";
                 }
             }
             //Pedido POST para a inserção da propriedade.
             var update = requestUpdate(obj, url_1);
         }
         result = update;
+    });
+
+
+    //Para os td com inputs (os das propriedades datatype).
+    var all_inputs_in_td = $("#" + parentID + " #range input");
+    var all_range_in_td = null;
+    all_range_in_td = $("#" + parentID + " #range2 select");
+    var entrou = null;
+    if (all_range_in_td == null) {
+        all_range_in_td = $("#" + parentID + " #range3");
+        entrou = 1;
+    }
+
+    $(all_inputs_in_td).each(function(index, value)
+    {
+        var opcaoSelecionada = $(this).val();
+        var range = null;
+        if (entrou != 1) {
+            range = $(all_range_in_td[index]).children("option").filter(":selected").text();
+        } else {
+            range = $(all_range_in_td[index]).attr('value');
+        }
+
+        if (opcaoSelecionada != "")
+        {
+            var url_2 = "/index.php/insertProperty/";
+            var valorPropriedade = "\"" + opcaoSelecionada + "\" ^^<http://www.w3.org/2001/XMLSchema#" + range + ">";
+
+            alert(element + "  " + propriedade + "  " + valorPropriedade);
+
+            if (type == "membro")
+            {
+                url_2 = url_2 + type + "/" + element + "/" + propriedade + "/" + opcaoSelecionada + "/null/" + range;
+            }
+            else
+            {
+                url_2 = url_2 + "naoFixo/" + element + "/null/" + propriedade + "/" + opcaoSelecionada + "/" + range;
+            }
+            $.post(url_2, function(result)
+            {
+                return(result);
+            });
+        }
     });
 
     return result;
@@ -620,7 +717,7 @@ function insertProperty(table_element, element, type)
 function insertNewProperty(step, propertyName, predicate, propertyType)
 {
     //Variáveis utilizadas.
-    var url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore";
+    var url_insertNewProperty = "/index.php/insertProperty/" + step + "/" + propertyName + "/" + predicate + "/" + propertyType + "/ignore/null";
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
@@ -644,7 +741,7 @@ function insertNewProperty(step, propertyName, predicate, propertyType)
 function insertVisibilityProperty()
 {
     //Endereço para chamada da função do controller.
-    var url_insertVisibilityProperty = "/index.php/insertProperty/visibilidade/null/null/null/null";
+    var url_insertVisibilityProperty = "/index.php/insertProperty/visibilidade/null/null/null/null/null";
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
@@ -658,7 +755,7 @@ function insertVisibilityProperty()
 function insertVisibilityPropertyValue(element, value)
 {
     //Endereço para chamada da função do controller.
-    var url_insertVisibilityProperty = "/index.php/insertData/visibilidade/" + element + "/" + value;   
+    var url_insertVisibilityProperty = "/index.php/insertProperty/visibilidadeValor/" + element + "/null/" + value + "/null/null";
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
@@ -767,19 +864,38 @@ function deleteComment(element)
     }
 }
 
-function deleteProperties(element)
+function deleteProperties(type, property, value)
 {
-    //Ainda não desenvolvido...
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+    var update = 0;
+
+    if (type == 'membro')
+    {
+        //alert(type + " " + selectedMember + " " + property + " " + value);
+        var url_deleteProperty = "/index.php/deleteProperty/membro/" + selectedMember + "/" + property + "/" + value + "/null/null";
+        alert(url_deleteProperty);
+
+        //Pedido POST para a eliminação da propriedade indicada.
+        var update = requestUpdate(obj, url_deleteProperty);
+    }
+    else if (type == 'classe')
+    {
+        alert(type + " " + selectedClass + " " + property + " " + value);
+    }
+    
+    if (update != 1)
+    {
+        alert("Erro: Eliminacao da propriedade sem sucesso...");
+    }
 }
 
 function deleteVisibilityPropertyValue(element, value)
 {
     //Endereço para chamada da função do controller.
-    var url_deleteVisibilityProperty = "index.php/deleteData/visibilidade/" + element + "/" + value;
-
+    var url_deleteVisibilityProperty = "/index.php/deleteProperty/visibilidade/" + element + "/null/" + value + "/null/null";
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
-
     //Pedido POST para a eliminação da classe indicada.
     var update = requestUpdate(obj, url_deleteVisibilityProperty);
 
@@ -796,6 +912,7 @@ function callFunctionsFromLink(label, chamada)
      * 2 - consulta de um Membro.
      * 3 - eliminação de uma Classe.
      * 4 - eliminação de um Membro.
+     * 5 - consulta de uma propriedade.
      */
 
     if (chamada == "1")
@@ -838,7 +955,26 @@ function callFunctionsFromLink(label, chamada)
     {
         alert("Erro: Erro em chamar a funcao de consulta.");
     }
+}
 
+function callFunctionsforProperties(type, property, value)
+{
+    var divContent = document.getElementById("content");
+    
+    if(type == "membro")
+    {
+        deleteProperties(type, property, value);
+        //Atualização da div de conteúdo.
+        cleanDIV(divContent);
+        consultMember(selectedMember);
+    }
+    else if(type == "classe")
+    {
+        deleteProperties(type, property, value);
+        //Atualização da div de conteúdo.
+        cleanDIV(divContent);
+        consultClass(selectedClass);
+    }
 }
 
 function createModalWindow(url, classParent, chamada)
