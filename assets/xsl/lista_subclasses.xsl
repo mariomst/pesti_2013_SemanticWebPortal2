@@ -16,18 +16,44 @@
     </xsl:template>
 
     <xsl:template match="sp:result">
-
-        <li id="{generate-id()}">
-            <button>
-                <xsl:attribute name="onclick">
-                    <xsl:text>elementVisibility(this);</xsl:text>
-                </xsl:attribute>
-                <img src="/assets/images/eye_open.png" width="24px" height="24px"/>
-            </button>
-            <span class="subclass" id="{generate-id()}" onclick="selectedElement(this)">
-                <xsl:value-of select="normalize-space(sp:binding[@name='localName'])"/>
-            </span>            
-        </li>     	
+        
+        <xsl:variable name="type">
+            <xsl:value-of select="normalize-space(sp:binding[@name='visivel'])"/>  
+        </xsl:variable>
+        
+        <xsl:variable name="value">
+            <xsl:value-of select="normalize-space(sp:binding[@name='localName'])"/>
+        </xsl:variable>
+        
+        <xsl:choose>
+            <xsl:when test="$type = 'FALSE'">
+                <li id="{generate-id()}">
+                    <button>
+                        <xsl:attribute name="onclick">                           
+                            <xsl:text>elementVisibility('</xsl:text>
+                            <xsl:value-of select="$value" />
+                            <xsl:text>', 2);</xsl:text>
+                        </xsl:attribute>
+                        <img src="/assets/images/eye_closed.png" width="24px" height="24px"/>
+                    </button>                    
+                </li>
+            </xsl:when>
+            <xsl:otherwise>                
+                <li id="{generate-id()}">
+                    <button>
+                        <xsl:attribute name="onclick">                           
+                            <xsl:text>elementVisibility('</xsl:text>
+                            <xsl:value-of select="$value" />
+                            <xsl:text>', 1);</xsl:text>
+                        </xsl:attribute>
+                        <img src="/assets/images/eye_open.png" width="24px" height="24px"/>
+                    </button>
+                    <span class="subclass" id="{generate-id()}" onclick="selectedElement(this)">
+                        <xsl:value-of select="normalize-space(sp:binding[@name='localName'])"/>
+                    </span>            
+                </li>     
+            </xsl:otherwise>
+        </xsl:choose>	
 
     </xsl:template>
 

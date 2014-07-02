@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 3.3
+ * Versão 3.4
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -34,6 +34,7 @@
  * 3.1 -> adição da função getPropertyInfo, que retorna o tipo e características da propriedade indicada.
  * 3.2 -> adição das funções insertVisibilityProperty e deleteVisibilityProperty.
  * 3.3 -> desenvolvimento da função getMemberProperty.
+ * 3.4 -> alteração das funções listClasses e listSubClasses para incluir as pesquisas da propriedade temVisibilidade.
  * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -159,7 +160,7 @@ class PESTI_Controller extends CI_Controller {
           }
           }
          */
-        
+
         //Obter a URI completa e adicionar a variável $classeMae
         $ontologyURI = $this->getURI();
         $temVisibilidade = '<' . $ontologyURI . '#temVisibilidade>';
@@ -203,40 +204,74 @@ class PESTI_Controller extends CI_Controller {
         /*
           SPARQL QUERY:
 
+          PREFIX : <http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl#>
           PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
           PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
           PREFIX a: <http://www.w3.org/2002/07/owl#>
 
-          select ?subClasse (strafter(str(?subClasse), "#") AS ?localName)
+          select distinct ?subClasse (strafter(str(?subClasse), "#") AS ?localName) (STR(?v) AS ?visivel)
+
           where{
+          {
           {?subClasse rdf:subClassOf ?classe .
+          ?subClasse :temVisibilidade ?v.
           ?classe rdfns:type a:Class .}
-
           UNION
-
-          {?subClasse a:equivalentClass ?classe1 .
+          {?subClasse rdf:subClassOf ?classe .
+          FILTER NOT EXISTS {?subClasse :temVisibilidade ?v.}
+          ?classe rdfns:type a:Class .}
+          }
+          UNION
+          {
+          {
+          ?subClasse a:equivalentClass ?classe1 .
           ?classe1 a:intersectionOf ?classe2 .
           ?classe2 rdfns:first ?classe .
-          ?classe rdfns:type a:Class .}
+          ?classe rdfns:type a:Class .
+          ?subClasse :temVisibilidade ?v.
+          }
+          UNION
+          {
+          ?subClasse a:equivalentClass ?classe1 .
+          ?classe1 a:intersectionOf ?classe2 .
+          ?classe2 rdfns:first ?classe .
+          ?classe rdfns:type a:Class .
+          FILTER NOT EXISTS {?subClasse :temVisibilidade ?v.}
+          }
+          }
           }
          */
 
-        //Obter a URI completa e adicionar a variável $classeMae
+        //Obter a URI completa e adicionar a variável $classeMae.
         $ontologyURI = $this->getURI();
         $fullURI = '<' . $ontologyURI . '#' . $classeMae . '>';
+        //Obter a URI completa e adicionar a propriedade temVisibilidade.
+        $temVisibilidade = '<' . $ontologyURI . '#temVisibilidade>';
 
         $query = 'PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#> ';
         $query = $query . 'PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
         $query = $query . 'PREFIX a: <http://www.w3.org/2002/07/owl#> ';
-        $query = $query . 'select ?subClasse (strafter(str(?subClasse), "#") AS ?localName) ';
-        $query = $query . 'where{ ';
+        $query = $query . 'select distinct ?subClasse (strafter(str(?subClasse), "#") AS ?localName) (STR(?v) AS ?visivel) ';
+        $query = $query . 'where{{ ';
         $query = $query . '{?subClasse rdf:subClassOf ' . $fullURI . '. ';
+        $query = $query . '?subClasse ' . $temVisibilidade . ' ?v. ';
         $query = $query . $fullURI . ' rdfns:type a:Class.} ';
         $query = $query . 'UNION ';
-        $query = $query . '{?subClasse a:equivalentClass ?classe1. ';
+        $query = $query . '{?subClasse rdf:subClassOf ' . $fullURI . '. ';
+        $query = $query . 'FILTER NOT EXISTS {?subClasse ' . $temVisibilidade . ' ?v.} ';
+        $query = $query . $fullURI . ' rdfns:type a:Class.} ';
+        $query = $query . '}UNION{{ ';
+        $query = $query . '?subClasse a:equivalentClass ?classe1. ';
         $query = $query . '?classe1 a:intersectionOf ?classe2. ';
         $query = $query . '?classe2 rdfns:first ' . $fullURI . '. ';
-        $query = $query . $fullURI . ' rdfns:type a:Class.}}';
+        $query = $query . $fullURI . ' rdfns:type a:Class. ';
+        $query = $query . '?subClasse ' . $temVisibilidade . ' ?v. ';
+        $query = $query . '}UNION{ ';
+        $query = $query . '?subClasse a:equivalentClass ?classe1. ';
+        $query = $query . '?classe1 a:intersectionOf ?classe2. ';
+        $query = $query . '?classe2 rdfns:first ' . $fullURI . '. ';
+        $query = $query . $fullURI . ' rdfns:type a:Class. ';
+        $query = $query . 'FILTER NOT EXISTS {?subClasse ' . $temVisibilidade . ' ?v.}}}}';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
@@ -1367,8 +1402,8 @@ class PESTI_Controller extends CI_Controller {
 
         //Definição da URI do valor de temVisibilidade.
         $value_uri = ' "' . $value . '"^^<http://www.w3.org/2001/XMLSchema#boolean>. ';
-        
-   
+
+
 
         //Envio para a função privada sendDelte
         $result = $this->sendDelete($subject_uri, $temVisibilidade, $value_uri);
@@ -1419,7 +1454,7 @@ class PESTI_Controller extends CI_Controller {
 
         return $result;
     }
-    
+
     private function sendInsert($subject, $predicate, $object) {
         //Variável result recebe 1 se a inserção for com sucesso.
         $result = $this->pesti_model->inserir_data($this->url_db_insert, $subject, $predicate, $object);
