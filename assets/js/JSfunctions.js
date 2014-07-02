@@ -216,28 +216,26 @@ function highlightElement(target)
     $(target).addClass('highlight');
 }
 
-function elementVisibility(button)
+function elementVisibility(elementLabel, chamada)
 {
-    //Obtêm o elemento 'span' mais perto do botão.
-    var listElement = $(button).closest('li').find('span');
-
-    //Verifica se o elemento esta ou não visível.
-    if ($(listElement).is(":visible"))
+    //DIV da árvore.
+    var divMenu = document.getElementById("menu");
+    
+    if(chamada == "1")
     {
-        //$(listElement).hide();
-        //$(button).find('img').attr('src', "/assets/images/eye_closed.png");
-        //Remove (caso esteja associada a classe) a propriedade temVisibilidade.
-        var delResult = deleteVisibilityPropertyValue($(listElement).text(), "TRUE");
-        var insResult = insertVisibilityPropertyValue($(listElement).text(), "FALSE");
+        //Ocultar a classe
+        deleteVisibilityPropertyValue(elementLabel, "TRUE");
+        insertVisibilityPropertyValue(elementLabel, "FALSE");
     }
     else
     {
-        //$(listElement).show();
-        //$(button).find('img').attr('src', "/assets/images/eye_open.png");
-        //Remove (caso esteja associada a classe) a propriedade temVisibilidade.
-        var delResult = deleteVisibilityPropertyValue($(listElement).text(), "FALSE");
-        var insResult = insertVisibilityPropertyValue($(listElement).text(), "TRUE");
+        //Mostrar a classe
+        deleteVisibilityPropertyValue(elementLabel, "FALSE");
+        insertVisibilityPropertyValue(elementLabel, "TRUE");
     }
+    
+    cleanDIV(divMenu);
+    constructClassTree(divMenu);
 }
 
 function createPropertySelects(element, type)
@@ -874,8 +872,6 @@ function deleteProperties(type, property, value)
     {
         //alert(type + " " + selectedMember + " " + property + " " + value);
         var url_deleteProperty = "/index.php/deleteProperty/membro/" + selectedMember + "/" + property + "/" + value + "/null/null";
-        alert(url_deleteProperty);
-
         //Pedido POST para a eliminação da propriedade indicada.
         var update = requestUpdate(obj, url_deleteProperty);
     }

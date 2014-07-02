@@ -131,10 +131,24 @@ class PESTI_Controller extends CI_Controller {
           PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
           PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
           PREFIX a: <http://www.w3.org/2002/07/owl#>
+          PREFIX : <http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl#>
 
-          SELECT ?classeMae (strafter(str(?classeMae), "#") AS ?localName)
+          SELECT ?classeMae (strafter(str(?classeMae), "#") AS ?localName) (STR(?v) AS ?visivel)
+
           WHERE{
+          {
           ?classeMae rdfns:type a:Class .
+          ?classeMae :temVisibilidade ?v.
+          FILTER (!isBlank(?classeMae))
+          FILTER NOT EXISTS{
+          {?classeMae rdf:subClassOf ?classe .
+          ?classe rdfns:type a:Class .}
+          UNION
+          {?classeMae a:equivalentClass ?classe2}
+          }
+          }UNION{
+          ?classeMae rdfns:type a:Class .
+          FILTER NOT EXISTS {?classeMae :temVisibilidade ?v.}
           FILTER (!isBlank(?classeMae))
           FILTER NOT EXISTS{
           {?classeMae rdf:subClassOf ?classe .
@@ -143,18 +157,31 @@ class PESTI_Controller extends CI_Controller {
           {?classeMae a:equivalentClass ?classe2}
           }
           }
+          }
          */
+        
+        //Obter a URI completa e adicionar a variável $classeMae
+        $ontologyURI = $this->getURI();
+        $temVisibilidade = '<' . $ontologyURI . '#temVisibilidade>';
 
         $query = 'PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#> ';
         $query = $query . 'PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
         $query = $query . 'PREFIX a: <http://www.w3.org/2002/07/owl#> ';
-        $query = $query . 'SELECT ?classeMae (strafter(str(?classeMae), "#") AS ?localName) ';
-        $query = $query . 'WHERE { ?classeMae rdfns:type a:Class. ';
+        $query = $query . 'SELECT ?classeMae (strafter(str(?classeMae), "#") AS ?localName) (STR(?v) AS ?visivel) ';
+        $query = $query . 'WHERE { { ?classeMae rdfns:type a:Class . ';
+        $query = $query . '?classeMae ' . $temVisibilidade . ' ?v. ';
         $query = $query . 'FILTER (!isBlank(?classeMae)) ';
         $query = $query . 'FILTER NOT EXISTS{ ';
         $query = $query . '{?classeMae rdf:subClassOf ?classe. ';
         $query = $query . '?classe rdfns:type a:Class.} ';
-        $query = $query . 'UNION {?classeMae a:equivalentClass ?classe2}}}';
+        $query = $query . 'UNION {?classeMae a:equivalentClass ?classe2}}} ';
+        $query = $query . 'UNION { ?classeMae rdfns:type a:Class . ';
+        $query = $query . 'FILTER NOT EXISTS {?classeMae ' . $temVisibilidade . ' ?v.} ';
+        $query = $query . 'FILTER (!isBlank(?classeMae)) ';
+        $query = $query . 'FILTER NOT EXISTS{ ';
+        $query = $query . '{?classeMae rdf:subClassOf ?classe. ';
+        $query = $query . '?classe rdfns:type a:Class. }';
+        $query = $query . 'UNION {?classeMae a:equivalentClass ?classe2}}}}';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         if ($chamada == 1) {
@@ -1233,6 +1260,8 @@ class PESTI_Controller extends CI_Controller {
          * myOWL:temVisibilidade rdf:type owl:DatatypeProperty.
          * myOWL:temVisibilidade rdfs:range xsd:boolean.
          * myOWL:temVisibilidade rdf:type owl:functionalProperty.
+         * myOWL:temVisibilidade rdfs:domain owl:class.
+         *
          * }
          */
 
@@ -1245,7 +1274,8 @@ class PESTI_Controller extends CI_Controller {
         //Construção dos argumentos para inserção do valor e propriedade na classe
         $argumentos = $temVisibilidade . " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty>. ";
         $argumentos = $argumentos . $temVisibilidade . " <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean>. ";
-        $argumentos = $argumentos . $temVisibilidade . " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#functionalProperty>";
+        $argumentos = $argumentos . $temVisibilidade . " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#functionalProperty>. ";
+        $argumentos = $argumentos . $temVisibilidade . " <http://www.w3.org/2000/01/rdf-schema#domain> <http://www.w3.org/2002/07/owl#class>. ";
 
         //Envio para a função insert_data_2 que recebe vários argumentos.
         $result = $this->pesti_model->inserir_data_2($this->url_db_insert, $argumentos);
@@ -1257,36 +1287,24 @@ class PESTI_Controller extends CI_Controller {
         /*
          * SPARQL Query
          * 
-         * PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-         * PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-         * PREFIX owl: <http://www.w3.org/2002/07/owl#>
-         * PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
          * PREFIX myOWL: <http://www.semanticweb.org/ontologies/2012/3/Ontology1334263618896.owl#>
          * 
          * INSERT DATA{
-         * myOWL:teste_temVisibilidade rdfs:subClassOf _:foo.
-         * _:foo rdf:type owl:Restriction.
-         * _:foo owl:onDataRange xsd:boolean.
-         * _:foo owl:onProperty myOWL:temVisibilidade.
-         * _:foo owl:qualifiedCardinality "TRUE" ^^xsd:boolean.
+         * myOWL:Specs myOWL:temVisibiliade "TRUE" ^^<http://www.w3.org/2001/XMLSchema#boolean>.
          * }
          */
 
         //Definição da URI da ontologia.
         $uri = $this->getURI();
 
-        //Definição da URI da propriedade temVisibilidade.
+        //Definição da URI da propriedade temVisibilidade.        
         $temVisibilidade = "<" . $uri . "#temVisibilidade>";
 
-        //Construção dos argumentos para inserção do valor e propriedade na classe
-        $argumentos = $subject_uri . " <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:foo. ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction>. ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onDataRange> <http://www.w3.org/2001/XMLSchema#boolean>. ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onProperty> " . $temVisibilidade . ". ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#qualifiedCardinality> " . "\"" . $value . "\"" . "^^<http://www.w3.org/2001/XMLSchema#boolean>. ";
+        //Definição da URI do valor de temVisibilidade.
+        $value_uri = ' "' . $value . '" ^^<http://www.w3.org/2001/XMLSchema#boolean>. ';
 
-        //Envio para a função insert_data_2 que recebe vários argumentos.
-        $result = $this->pesti_model->inserir_data_2($this->url_db_insert, $argumentos);
+        //Envio para a função privada sendInsert
+        $result = $this->sendInsert($subject_uri, $temVisibilidade, $value_uri);
 
         return $result;
     }
@@ -1344,18 +1362,16 @@ class PESTI_Controller extends CI_Controller {
         //Definição da URI da ontologia.
         $uri = $this->getURI();
 
-        //Definição da URI da propriedade temVisibilidade.
+        //Definição da URI da propriedade temVisibilidade.        
         $temVisibilidade = "<" . $uri . "#temVisibilidade>";
 
-        //Construção da query para inserção do valor e propriedade na classe
-        $argumentos = $subject_uri . " <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:foo. ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction>. ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onDataRange> <http://www.w3.org/2001/XMLSchema#boolean>. ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#onProperty> " . $temVisibilidade . ". ";
-        $argumentos = $argumentos . " _:foo <http://www.w3.org/2002/07/owl#qualifiedCardinality> " . "\"" . $value . "\"" . "^^<http://www.w3.org/2001/XMLSchema#boolean>. ";
+        //Definição da URI do valor de temVisibilidade.
+        $value_uri = ' "' . $value . '"^^<http://www.w3.org/2001/XMLSchema#boolean>. ';
+        
+   
 
-        //Envio para a função insert_data_2 que recebe vários argumentos.
-        $result = $this->pesti_model->eliminar_data_2($this->url_db_insert, $argumentos);
+        //Envio para a função privada sendDelte
+        $result = $this->sendDelete($subject_uri, $temVisibilidade, $value_uri);
 
         return $result;
     }
@@ -1369,7 +1385,7 @@ class PESTI_Controller extends CI_Controller {
         $subject_uri = "<" . $full_uri . "#" . $subject . ">";
         //Criação da URI do predicado.
         $predicate_uri = "<" . $full_uri . "#" . $predicate . ">";
-        
+
         if ($type == "uri") {
             //Se não for datatype.
             //Criação da URI do objecto.
@@ -1387,6 +1403,10 @@ class PESTI_Controller extends CI_Controller {
         }
     }
 
+    /********************************************************
+     *                  COMUNICAÇÃO MODEL                   *
+     ********************************************************/
+
     private function sendQuery($query, $xslfile) {
         //Variável XML recebe o resultado da query obtido do método presente no modelo
         $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
@@ -1399,11 +1419,7 @@ class PESTI_Controller extends CI_Controller {
 
         return $result;
     }
-
-    /********************************************************
-     *                  COMUNICAÇÃO MODEL                   *
-     ********************************************************/
-
+    
     private function sendInsert($subject, $predicate, $object) {
         //Variável result recebe 1 se a inserção for com sucesso.
         $result = $this->pesti_model->inserir_data($this->url_db_insert, $subject, $predicate, $object);
