@@ -123,6 +123,33 @@ function requestUpdate(obj, url)
     return result;
 }
 
+function checkUser(username, password)
+{
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
+    var obj = XMLHttpObject();
+
+    //URL da função existente no Controller.
+    var url_checkUser = "/index.php/checkUserPassword/" + username + "/" + password;
+
+    //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
+    var result = requestInformation(obj, url_checkUser);
+
+    return result;
+}
+
+function logout()
+{
+    document.cookie = "user=";
+    location.reload();
+}
+
+function getUserName(userCookie)
+{
+    var username = userCookie.split("=");
+    
+    return username[1];
+} 
+
 function selectedElement(target)
 {
     //Obtêm o nr de filhos (subclasses) que a classe tem na lista;
@@ -220,8 +247,8 @@ function elementVisibility(elementLabel, chamada)
 {
     //DIV da árvore.
     var divMenu = document.getElementById("menu");
-    
-    if(chamada == "1")
+
+    if (chamada == "1")
     {
         //Ocultar a classe
         deleteVisibilityPropertyValue(elementLabel, "TRUE");
@@ -233,7 +260,7 @@ function elementVisibility(elementLabel, chamada)
         deleteVisibilityPropertyValue(elementLabel, "FALSE");
         insertVisibilityPropertyValue(elementLabel, "TRUE");
     }
-    
+
     cleanDIV(divMenu);
     constructClassTree(divMenu);
 }
@@ -879,7 +906,7 @@ function deleteProperties(type, property, value)
     {
         alert(type + " " + selectedClass + " " + property + " " + value);
     }
-    
+
     if (update != 1)
     {
         alert("Erro: Eliminacao da propriedade sem sucesso...");
@@ -956,15 +983,15 @@ function callFunctionsFromLink(label, chamada)
 function callFunctionsforProperties(type, property, value)
 {
     var divContent = document.getElementById("content");
-    
-    if(type == "membro")
+
+    if (type == "membro")
     {
         deleteProperties(type, property, value);
         //Atualização da div de conteúdo.
         cleanDIV(divContent);
         consultMember(selectedMember);
     }
-    else if(type == "classe")
+    else if (type == "classe")
     {
         deleteProperties(type, property, value);
         //Atualização da div de conteúdo.
@@ -1034,6 +1061,13 @@ function createModelessWindow(url)
                 {
                     minW: 500,
                     minH: 500
+                },
+        callbacks:
+                {
+                    afterClose: function()
+                    {
+                        location.reload();
+                    }
                 }
     });
     $.nmManual(url);

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * User Controller
  * - Vai tratar dos pedidos da aplicação Web relacionados com utilizadores.
  * 
@@ -31,74 +31,73 @@
  * getURI               ->  Retorna a URI da ontologia.
  */
 
-class User_Controller extends CI_Controller
-{
+class User_Controller extends CI_Controller {
+
     //================= Variáveis Globais ===================
     protected $url_user_db_sparql = 'null';
     protected $url_user_db_update = 'null';
-    
+
     //================= Funções Públicas ====================
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
         $this->load->model('pesti_model');
     }
-    
-    public function viewLogin($page = 'login')
-    {
-        if(!file_exists('application/views/pages/'.$page.'.php'))
-        {
+
+    public function viewLogin($page = 'login') {
+        if (!file_exists('application/views/pages/' . $page . '.php')) {
             show_404();
         }
 
         $data['title'] = ucfirst($page);
 
-        $this->load->view('pages/'.$page,$data);
+        $this->load->view('pages/' . $page, $data);
     }
 
-    public function viewRegister($page = 'registro')
-    {
-        if(!file_exists('application/views/pages/'.$page.'.php'))
-        {
+    public function viewRegister($page = 'registro') {
+        if (!file_exists('application/views/pages/' . $page . '.php')) {
             show_404();
         }
 
         $data['title'] = ucfirst($page);
 
-        $this->load->view('pages/'.$page,$data);
+        $this->load->view('pages/' . $page, $data);
     }
-    
-    public function checkUserExists($user)
-    {
-        //Ainda não desenvolvido.        
+
+    public function checkUserExists($user) {
+        //Apenas para testes.
+        if ($user == 'Admin' || $user == 'testUser') {
+            print_r("1");
+        } else {
+            print_r("0");
+        }
     }
-    
-    public function checkUserPassword($user, $password)
-    {
+
+    public function checkUserPassword($user, $password) {
+        //Apenas para testes.
+        if ($user == 'Admin' && $password == 'Admin') {
+            print_r("1");
+        } else if ($user == 'testUser' && $password == 'testUser') {
+            print_r("1");
+        } else {
+            print_r("0");
+        }
+    }
+
+    public function listUsers() {
         //Ainda não desenvolvido.
     }
-    
-    public function listUsers()
-    {
+
+    public function insertNewUser($user, $password) {
         //Ainda não desenvolvido.
     }
-    
-    public function insertNewUser($user, $password)
-    {
+
+    public function deleteUser($user) {
         //Ainda não desenvolvido.
     }
-    
-    public function deleteUser($user)
-    {
-        //Ainda não desenvolvido.
-    }
-    
+
     //================= Funções Privadas ====================
-    private function getURI()
-    {
+    private function getURI() {
         //Ainda não desenvolvido.
     }
+
 }
-
-
-
