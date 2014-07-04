@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.7
+ * Versão 2.8
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -148,7 +148,7 @@ function logout()
 
 function getUserName(userCookie)
 {
-    var username = userCookie.split("=");    
+    var username = userCookie.split("=");
     return username[1];
 }
 
@@ -444,9 +444,9 @@ function consultMember(memberLabel)
 {
     //Verifica se existe uma sessão ativa
     var user = getUserName(document.cookie);
-    
+
     //Variáveis utilizadas
-    if(user != "")
+    if (user != "")
     {
         url_properties = "/index.php/getMemberProperty/" + memberLabel + "/1";
     }
@@ -475,7 +475,7 @@ function consultMember(memberLabel)
 
     $(".content").append("<br><br><b>Coment&aacute;rio:</b> " + result_comment);
 
-    if(user != "")
+    if (user != "")
     {
         $(".content").append("<br>&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + memberLabel + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
@@ -488,9 +488,9 @@ function consultClass(classLabel)
 {
     //Verifica se existe uma sessão ativa
     var user = getUserName(document.cookie);
-    
+
     //Endereços utilizados.
-    if(user == "")
+    if (user == "")
     {
         url_members = "/index.php/getMembers/" + classLabel + "/0";
         url_subclasses = "/index.php/getSubClasses/" + classLabel + "/0";
@@ -501,7 +501,7 @@ function consultClass(classLabel)
         url_members = "/index.php/getMembers/" + classLabel + "/1";
         url_subclasses = "/index.php/getSubClasses/" + classLabel + "/1";
         url_properties = "/index.php/getClassProperty/" + classLabel + "/1";
-    }    
+    }
 
     url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + classLabel + "&chamada=1";
     url_insert_member = "/index.php/insertClass/?type=membro&class=" + classLabel + "&chamada=1";
@@ -526,14 +526,14 @@ function consultClass(classLabel)
 
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
 
-    if(user != "")
+    if (user != "")
     {
         $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
     }
-     
+
     $(".content").append("<br>");
-    
+
     //Chamada de funções para cada secção do DIV
     appendMembers(obj, classLabel, url_insert_member, url_members);
     appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses);
@@ -544,7 +544,7 @@ function consultProperty(propertyLabel)
 {
     //Verifica se existe uma sessão ativa
     var user = getUserName(document.cookie);
-    
+
     //Endereços utilizados.
     var url_uri = "/index.php/printURI";
     var url_range = "/index.php/getPropertyRange/" + propertyLabel + "/2";
@@ -571,7 +571,7 @@ function consultProperty(propertyLabel)
 
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
 
-    if(user != "")
+    if (user != "")
     {
         $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
@@ -878,7 +878,6 @@ function deleteClass(classLabel, superClassLabel)
     var url_membersList = "/index.php/getMembers/" + classLabel + "/3";
     var url_subClassesList = "/index.php/listSubClasses/" + classLabel;
     var url_deleteClass = "/index.php/deleteData/classe/" + classLabel + "/" + superClassLabel;
-    var divCont = document.getElementById("content");
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
@@ -886,8 +885,6 @@ function deleteClass(classLabel, superClassLabel)
     var result_subClassesList = requestInformation(obj, url_subClassesList);
     //Obter a lista de membros da Classe seleccionada.
     var result_membersList = requestInformation(obj, url_membersList);
-    //Obter o comentário da Classe seleccionada.
-    var result_comment = requestInformation(obj, url_comment);
 
     //Obter o tamanho da lista de subClasses.
     var subClassesList_length = $(result_subClassesList).find('li').length;
@@ -926,11 +923,28 @@ function deleteClass(classLabel, superClassLabel)
 function deleteMember(memberLabel, classLabel)
 {
     //Variáveis utilizadas
+    var url_propertiesList = "/index.php/getMemberProperty/" + memberLabel + "/3";
     var url_deleteMember = "/index.php/deleteData/membro/" + memberLabel + "/" + classLabel;
-    var divCont = document.getElementById("content");
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
+
+    //Obter a lista de propriedades da Classe seleccionada.
+    var result_properties = requestInformation(obj, url_propertiesList);
+
+    //Obter o tamanho da lista de subClasses.
+    var properties_length = $(result_properties).find('li').length;
+
+    //Verifica se existem propriedades do membro a ser eliminado.
+    if (properties_length != 0)
+    {
+        $(result_properties).find('li').each(function()
+        {
+            var property = $(this).find('span').first().text();
+            var value = $(this).find('span').last().text();
+            deleteProperties('membro', property, value);
+        });
+    }
 
     //Pedido POST para a eliminação da classe indicada.
     var update = requestUpdate(obj, url_deleteMember);

@@ -4,37 +4,10 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 3.4
+ * Versão 3.5
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
- * 
- * ========================================================   Changelog:   =============================================================================================
- * 1.0 -> criado função consult que recebe do modelo o XML e retornam o XML para a view.
- * 1.1 -> criado função consultXSLT que recebe do modelo o XML e envia para um metodo que utiliza XSLT para retonar uma tabela HTML.
- * 1.2 -> criado função que vai buscar as subClasses das Specs (ver Ontologia) e retorna-os num XML.
- * 1.3 -> criado função insertData que recebe 2 parametros (sujeito e objecto), adiciona as URI's de acordo com a ontologia e chama a função respectiva do modelo.
- * 1.4 -> reconstrução do controller, as query são enviadas do controller para a função "enviar_query" do model.   
- * 1.5 -> criado função listClasses que retorna as classes mãe existentes na ontologia, alterado a função useXSLT para receber como parametro o ficheiro XSL a ser usado.
- * 1.6 -> criado função listSubClasses que retorna as subClasses existentes na ontologia. 
- * 1.7 -> criado função getMembers que retorna os membros da classe selecionada.
- * 1.8 -> adição da função privada getURI com a funcionalidade de obter o URI da ontologia apartir da função ListClasses.
- * 1.9 -> adição da função getProperties que retorna as propriedades existentes na ontologia.
- * 2.0 -> adição da função getPropertyRange que retorna o range da dada propriedade. Adição de um parametro ao getMembers para utilizar diferentes ficheiros XSL.
- * 2.1 -> adição das funções getSubClasses e getMemberProperty, descrição das funcionalidades indicadas em baixo.
- * 2.2 -> atualização do insertData, adicionado a inserção de comentários nas classes e membros da ontologia.
- * 2.3 -> adição da função deleteData, descrição da função indicada em baixo.
- * 2.4 -> alteração da forma como as queries eram enviadas para o Model. Correcção de alguns erros.
- * 2.5 -> adição das funções getClassProperty_M1 e getClassProperty_M2.
- * 2.6 -> adição da função insertProperty.
- * 2.7 -> alteração da estrutura, criação de algumas funções privadas, descrição indicada em baixo.
- * 2.8 -> alterado a função insertData, para cada caso chama a função privada apropriada; adição das funções privadas. insertClass, insertMember, insertCommentary.
- * 2.9 -> adição da função selectSubClasses, descrição da função indicada em baixo.
- * 3.0 -> adição da função privada readConfigFile, para permitir a leitura do endereço do servidor Fuseki apartir de um ficheiro .ini.
- * 3.1 -> adição da função getPropertyInfo, que retorna o tipo e características da propriedade indicada.
- * 3.2 -> adição das funções insertVisibilityProperty e deleteVisibilityProperty.
- * 3.3 -> desenvolvimento da função getMemberProperty.
- * 3.4 -> alteração das funções listClasses e listSubClasses para incluir as pesquisas da propriedade temVisibilidade.
  * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
@@ -103,7 +76,8 @@ class PESTI_Controller extends CI_Controller {
         }
 
         //O titulo da página é definida no array $data
-        $data['title'] = ucfirst($page);
+        $title = 'Semantic Web Portal - ' . ucfirst($page);
+        $data['title'] = $title;
 
         //carregar os views na ordem que devem ser exibidos
         $this->load->view('templates/header', $data);
@@ -788,8 +762,10 @@ class PESTI_Controller extends CI_Controller {
         //Ficheiro XSL a ser usado para a transformação do XML
         if($chamada == 0){
             $xslfile = "http://localhost/assets/xsl/tabela_propriedades(nonUsers).xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
-        } else {
+        } else if($chamada == 1) {
             $xslfile = "http://localhost/assets/xsl/tabela_propriedades.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        } else {
+            $xslfile = "http://localhost/assets/xsl/lista_propriedadesMembros.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
         }
         
         $result = $this->sendQuery($query, $xslfile);

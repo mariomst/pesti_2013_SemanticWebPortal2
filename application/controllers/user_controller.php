@@ -9,18 +9,14 @@
  * @author Mário Teixeira   1090626     1090626@isep.ipp.pt
  * @author Marta Graça      1100640     1100640@isep.ipp.pt
  * 
- * =================================== Changelog ========================================
- * 1.0 -> Declaração de alguns dos métodos para o tratamento de utilizadores.
- * 1.1 -> Adição das Views "Login" e "Registro"
- * 
  * =================================== Descrição ========================================
  * Variáveis Globais:
  * url_user_db_sparql   ->  URL do servidor Fuseki para consultas.
  * url_user_db_update   ->  URL do servidor Fuseki para inserções/eliminações.
  * 
  * Funções Públicas:
- * viewLogin           ->  criação da view Login.
- * viewRegister        ->  criação da view Registro.
+ * viewLogin            ->  Criação da view Login.
+ * viewRegister         ->  Criação da view Registro.
  * checkUserExists      ->  Verifica se o utilizador existe na base de dados.
  * checkUserPassword    ->  Verifica se a password indicada pelo utilizador esta correta.
  * listUsers            ->  Lista todos os utlizadores existentes na base de dados.

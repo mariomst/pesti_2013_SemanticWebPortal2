@@ -9,25 +9,17 @@
  * @author Mário Teixeira
  * @author Marta Graça
  *
- * ========================================================   Changelog:   =============================================================================================
- * 1.0   ->  Criação e desenvolvimento das funções enviar_query e obter_xml;
- * 2.0   ->  Criação e desenvolvimento da função inserir_data;
- * 2.1   ->  Criação da função eliminar_data;
- * 2.2   ->  Desenvolvimento da função eliminar_data;
- * 2.3   ->  Desenvolvimento da função inserir_data_2;
- * 2.4   ->  Alteração da função consultar_data; Adicionado as funções privadas executar_consulta e executar_update;
- *
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
- * consultar_data   ->  Consulta data da TDB usando a query recebida.
- * inserir_data     ->  Insere data na TDB usando uma query de inserção simples.
- * inserir_data_2   ->  Insere data na TDB usando uma query com vários argumentos.
- * eliminar_data    ->  Elimina data da TDB usando uma query de eliminação simples.
- * eliminar_data_2  ->  Elimina data na TDB usando uma query com vários argumentos.
+ * consultar_data       ->  Consulta data da TDB usando a query recebida.
+ * inserir_data         ->  Insere data na TDB usando uma query de inserção simples.
+ * inserir_data_2       ->  Insere data na TDB usando uma query com vários argumentos.
+ * eliminar_data        ->  Elimina data da TDB usando uma query de eliminação simples.
+ * eliminar_data_2      ->  Elimina data na TDB usando uma query com vários argumentos.
  *
  * Funções Privadas:
- * executar_consulta  ->  Faz um pedido SPARQL ao servidor Fuseki para retornar a resposta da query enviada.
- * executar_update    ->  Faz um envio Update ao servidor Fuseki com a query recebida.
+ * executar_consulta    ->  Faz um pedido SPARQL ao servidor Fuseki para retornar a resposta da query enviada.
+ * executar_update      ->  Faz um envio Update ao servidor Fuseki com a query recebida.
  */
 
 class PESTI_Model extends CI_Model {
