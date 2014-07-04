@@ -41,8 +41,15 @@ header('Content-Type: text/html; charset=utf-8');
             });
 
             $(window).ready(function()
-            {
-                var user = getUserName(document.cookie);                
+            {        
+                var user = getUserName(document.cookie);
+                
+                if (user == null)
+                {
+                    document.cookie = "user=;";
+                }
+                
+                var user = getUserName(document.cookie);
 
                 if (user == "")
                 {
@@ -57,6 +64,6 @@ header('Content-Type: text/html; charset=utf-8');
                     $("#user_session").attr("href", "/index.php/login");
                     $("#user_session").attr("onclick", "logout();return false;");
                     $("#user_session").append("Logout");
-                }
+                }            
             });
         </script>

@@ -62,14 +62,14 @@ $route['deleteProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_cont
 
 //Páginas De listar informação da Ontologia
 $route['listClasses/(:any)'] = 'pesti_controller/listClasses/$1';
-$route['listSubClasses/(:any)'] = 'pesti_controller/listSubClasses/$1';
-$route['getSubClasses/(:any)'] = 'pesti_controller/getSubClasses/$1';
+$route['listSubClasses/(:any)/(:any)'] = 'pesti_controller/listSubClasses/$1/$2';
+$route['getSubClasses/(:any)/(:any)'] = 'pesti_controller/getSubClasses/$1/$2';
 $route['getMembers/(:any)/(:any)'] = 'pesti_controller/getMembers/$1/$2';
 $route['getProperties'] = 'pesti_controller/getProperties';
 $route['getPropertyRange/(:any)/(:any)'] = 'pesti_controller/getPropertyRange/$1/$2';
 $route['getPropertyInfo/(:any)'] = 'pesti_controller/getPropertyInfo/$1';
-$route['getClassProperty/(:any)'] = 'pesti_controller/getClassProperty/$1';
-$route['getMemberProperty/(:any)'] = 'pesti_controller/getMemberProperty/$1';
+$route['getClassProperty/(:any)/(:any)'] = 'pesti_controller/getClassProperty/$1/$2';
+$route['getMemberProperty/(:any)/(:any)'] = 'pesti_controller/getMemberProperty/$1/$2';
 $route['getComment/(:any)'] = 'pesti_controller/getComment/$1';
 $route['selectSubClasses/(:any)'] = 'pesti_controller/selectSubClasses/$1';
 

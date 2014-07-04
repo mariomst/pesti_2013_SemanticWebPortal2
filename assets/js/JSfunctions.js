@@ -12,6 +12,9 @@
  * - XMLHttpObject                  Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
  * - requestInformation             Envia o pedido http ao controller e retorna o resultado do XSLT.
  * - requestUpdate                  Envia o pedido post ao controller para a inserção de informação.
+ * - checkUser                      Verifica se o utilizador e password estão correctos.
+ * - logout                         Termina a sessão do utilizador e causa um refresh a página.
+ * - getUserName                    Vai buscar o nome do utilizador logado pelo cookie existente.
  * - selectedElement                Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
  * - cleanDIV                       Apenas faz limpeza da informação contida numa DIV.
  * - constructClassTree             Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
@@ -139,16 +142,15 @@ function checkUser(username, password)
 
 function logout()
 {
-    document.cookie = "user=";
+    document.cookie = "user=;";
     location.reload();
 }
 
 function getUserName(userCookie)
 {
-    var username = userCookie.split("=");
-    
+    var username = userCookie.split("=");    
     return username[1];
-} 
+}
 
 function selectedElement(target)
 {
@@ -188,11 +190,23 @@ function cleanDIV(target)
 
 function constructClassTree(target)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
     obj = XMLHttpObject();
 
-    //URL da função existente no Controller. 
-    url_Classes = "/index.php/listClasses/1";
+    //Impressão diferente se a sessão estiver activa ou não.
+    if (user == "")
+    {
+        //URL da função existente no Controller. 
+        url_Classes = "/index.php/listClasses/0";
+    }
+    else
+    {
+        //URL da função existente no Controller. 
+        url_Classes = "/index.php/listClasses/1";
+    }
 
     //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
     result = requestInformation(obj, url_Classes);
@@ -203,6 +217,9 @@ function constructClassTree(target)
 
 function getSubClasses(parentClass)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     obj = XMLHttpObject();
 
@@ -214,6 +231,16 @@ function getSubClasses(parentClass)
 
     //Adiciona ao URL, a classe a ser feita a pesquisa de subClasses.
     url_subClasses = url_subClasses + classLabel;
+
+    //Impressão diferente se a sessão estiver activa ou não.
+    if (user == "")
+    {
+        url_subClasses = url_subClasses + "/0";
+    }
+    else
+    {
+        url_subClasses = url_subClasses + "/1";
+    }
 
     //Chama o método que faz um pedido "get" ao servidor e recebe o resultado.
     result = requestInformation(obj, url_subClasses);
@@ -415,8 +442,18 @@ function deleteSelect(element)
 
 function consultMember(memberLabel)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+    
     //Variáveis utilizadas
-    url_properties = "/index.php/getMemberProperty/" + memberLabel;
+    if(user != "")
+    {
+        url_properties = "/index.php/getMemberProperty/" + memberLabel + "/1";
+    }
+    else
+    {
+        url_properties = "/index.php/getMemberProperty/" + memberLabel + "/0";
+    }
     url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + memberLabel + "&chamada=2";
     url_insert_prop = "/index.php/insertClass/?type=propriedade&class=" + memberLabel + "&chamada=2";
     url_uri = "/index.php/printURI";
@@ -438,18 +475,34 @@ function consultMember(memberLabel)
 
     $(".content").append("<br><br><b>Coment&aacute;rio:</b> " + result_comment);
 
-    $(".content").append("<br>&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
-    $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + memberLabel + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+    if(user != "")
+    {
+        $(".content").append("<br>&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
+        $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + memberLabel + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+    }
 
     appendProperties(obj, memberLabel, url_insert_prop, url_properties, 2);
 }
 
 function consultClass(classLabel)
 {
-    //Variáveis utilizadas
-    url_members = "/index.php/getMembers/" + classLabel + "/1";
-    url_subclasses = "/index.php/getSubClasses/" + classLabel;
-    url_properties = "/index.php/getClassProperty/" + classLabel;
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+    
+    //Endereços utilizados.
+    if(user == "")
+    {
+        url_members = "/index.php/getMembers/" + classLabel + "/0";
+        url_subclasses = "/index.php/getSubClasses/" + classLabel + "/0";
+        url_properties = "/index.php/getClassProperty/" + classLabel + "/0";
+    }
+    else
+    {
+        url_members = "/index.php/getMembers/" + classLabel + "/1";
+        url_subclasses = "/index.php/getSubClasses/" + classLabel + "/1";
+        url_properties = "/index.php/getClassProperty/" + classLabel + "/1";
+    }    
+
     url_insert_comment = "/index.php/insertClass/?type=comentario&class=" + classLabel + "&chamada=1";
     url_insert_member = "/index.php/insertClass/?type=membro&class=" + classLabel + "&chamada=1";
     url_insert_subclass = "/index.php/insertClass/?type=subclasse&class=" + classLabel + "&chamada=1";
@@ -473,9 +526,14 @@ function consultClass(classLabel)
 
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
 
-    $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
-    $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
-
+    if(user != "")
+    {
+        $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
+        $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
+    }
+     
+    $(".content").append("<br>");
+    
     //Chamada de funções para cada secção do DIV
     appendMembers(obj, classLabel, url_insert_member, url_members);
     appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses);
@@ -484,6 +542,9 @@ function consultClass(classLabel)
 
 function consultProperty(propertyLabel)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+    
     //Endereços utilizados.
     var url_uri = "/index.php/printURI";
     var url_range = "/index.php/getPropertyRange/" + propertyLabel + "/2";
@@ -510,10 +571,12 @@ function consultProperty(propertyLabel)
 
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
 
-    $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
-    $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
-
-    $(".content").append("<b>Range da propriedade " + propertyLabel + ":</b> " + result_range);
+    if(user != "")
+    {
+        $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
+        $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
+    }
+    $(".content").append("<br><b>Range da propriedade " + propertyLabel + ":</b> " + result_range);
 
     $(".content").append("<br><br><b>URI</b>: <a href=\"" + result_uri + "#" + result_range + "\" onclick=\"callFunctionsFromLink('" + result_range + "',2);return false;\">" + result_uri + "#" + result_range + "</a><br><br>");
 
@@ -524,6 +587,9 @@ function consultProperty(propertyLabel)
 
 function appendMembers(obj, classLabel, url_insert_member, url_members)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+
     $(".content").append("<b>Membros pertencentes &agrave; classe:</b>");
 
     //Obter todos os membros da classe seleccionada.
@@ -532,12 +598,18 @@ function appendMembers(obj, classLabel, url_insert_member, url_members)
     //Adição dos resultado na DIV
     $(".content").append(result_members);
 
-    $(".content").append("&#8594; Para adicionar um novo membro, clique no bot&atildeo ");
-    $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_member,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+    if (user != "")
+    {
+        $(".content").append("&#8594; Para adicionar um novo membro, clique no bot&atildeo ");
+        $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_member,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+    }
 }
 
 function appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+
     $(".content").append("<br><br><b>SubClasses pertencentes &agrave; classe:</b>");
 
     //Obter todos as subclasses da classe seleccionada.
@@ -546,12 +618,18 @@ function appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses)
     //Adição dos resultado na DIV
     $(".content").append(result_subclasses);
 
-    $(".content").append("&#8594; Para adicionar uma nova subclasse da classe " + classLabel + ", clique no bot&atildeo ");
-    $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_subclass, '" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+    if (user != "")
+    {
+        $(".content").append("&#8594; Para adicionar uma nova subclasse da classe " + classLabel + ", clique no bot&atildeo ");
+        $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_subclass, '" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+    }
 }
 
 function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
 {
+    //Verifica se existe uma sessão ativa
+    var user = getUserName(document.cookie);
+
     $(".content").append("<br><br><b>Propriedades associadas &agrave; classe:</b>");
 
     if (url_properties != "")
@@ -560,15 +638,18 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
         $(".content").append(result_properties);
     }
 
-    if (tipo == "1")
+    if (user != "")
     {
-        $(".content").append("<br>&#8594; Para adicionar uma nova propriedade &agrave; classe " + label + ", clique no bot&atildeo ");
-        $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_prop, '" + label + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
-    }
-    else if (tipo == "2")
-    {
-        $(".content").append("<br>&#8594; Para adicionar uma nova propriedade ao membro " + label + ", clique no bot&atildeo ");
-        $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_prop, '" + label + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+        if (tipo == "1")
+        {
+            $(".content").append("<br>&#8594; Para adicionar uma nova propriedade &agrave; classe " + label + ", clique no bot&atildeo ");
+            $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_prop, '" + label + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+        }
+        else if (tipo == "2")
+        {
+            $(".content").append("<br>&#8594; Para adicionar uma nova propriedade ao membro " + label + ", clique no bot&atildeo ");
+            $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_prop, '" + label + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
+        }
     }
 }
 

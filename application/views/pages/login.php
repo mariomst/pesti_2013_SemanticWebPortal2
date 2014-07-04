@@ -65,7 +65,7 @@
                         if(result == "1")
                         {
                             $("#errorMessage3").hide();
-                            document.cookie="user="+username;
+                            document.cookie="user="+username+";";
                             $.nmTop().close();
                         }
                         else

@@ -185,7 +185,14 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . 'UNION {?classeMae a:equivalentClass ?classe2}}}}';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
-        if ($chamada == 1) {
+        if($chamada == 0){
+            //Ficheiro XSL a ser usado para a transformação do XML
+            $xslfile = "http://localhost/assets/xsl/lista_classes(nonUsers).xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
+            //Enviar a query e o ficheiro XSL para o método privado
+            $result = $this->sendQuery($query, $xslfile);
+            print_r($result);
+        }
+        else if ($chamada == 1) {
             //Ficheiro XSL a ser usado para a transformação do XML
             $xslfile = "http://localhost/assets/xsl/lista_classes.xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
             //Enviar a query e o ficheiro XSL para o método privado
@@ -200,7 +207,7 @@ class PESTI_Controller extends CI_Controller {
         }
     }
 
-    public function listSubClasses($classeMae) {
+    public function listSubClasses($classeMae, $chamada) {
         /*
           SPARQL QUERY:
 
@@ -275,10 +282,15 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = "http://localhost/assets/xsl/lista_subclasses.xsl";  // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
+        if($chamada == 0){          
+            $xslfile = "http://localhost/assets/xsl/lista_subclasses(nonUsers).xsl";      // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML            
+        }
+        else if($chamada == 1){         
+            $xslfile = "http://localhost/assets/xsl/lista_subclasses.xsl";  // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML           
+        }
+        
         //Enviar a query e o ficheiro XSL para o método privado
         $result = $this->sendQuery($query, $xslfile);
-
         print_r($result);
     }
 
@@ -330,7 +342,7 @@ class PESTI_Controller extends CI_Controller {
         print_r($result);
     }
 
-    public function getSubClasses($classeMae) {
+    public function getSubClasses($classeMae, $chamada) {
         /*
           SPARQL QUERY:
 
@@ -371,11 +383,15 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = "http://localhost/assets/xsl/tabela_subclasses.xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
+        if ($chamada == 0) {
+            $xslfile = "http://localhost/assets/xsl/tabela_subclasses(nonUsers).xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
+        } else {
+            $xslfile = "http://localhost/assets/xsl/tabela_subclasses.xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML                     
+        }  
+        
         //Enviar a query e o ficheiro XSL para o método privado
         $result = $this->sendQuery($query, $xslfile);
-
-        print_r($result);
+        print_r($result);  
     }
 
     public function getMembers($classe, $chamada) {
@@ -408,7 +424,9 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        if ($chamada == 1) {
+        if ($chamada == 0) {
+            $xslfile = "http://localhost/assets/xsl/tabela_membros(nonUsers).xsl";
+        }else if ($chamada == 1) {
             $xslfile = "http://localhost/assets/xsl/tabela_membros.xsl";    // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
         } else if ($chamada == 2) {
             $xslfile = 'http://localhost/assets/xsl/select_membros.xsl';    // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
@@ -691,7 +709,7 @@ class PESTI_Controller extends CI_Controller {
         print_r($result);
     }
 
-    public function getClassProperty($classe) {
+    public function getClassProperty($classe, $chamada) {
         //Obter a URI completa e adicionar a variável $classe
         $ontologyURI = $this->getURI();
         $fullURI = '<' . $ontologyURI . '#' . $classe . '>';
@@ -710,14 +728,17 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
-
+        if ($chamada == 0) {
+            $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes(nonUsers).xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        } else {
+            $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes.xsl";  
+        }
+        
         $result = $this->sendQuery($query, $xslfile);
-
         print_r($result);
     }
 
-    public function getMemberProperty($membro) {
+    public function getMemberProperty($membro, $chamada) {
         /*
           SPARQL QUERY:
 
@@ -765,10 +786,13 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = "http://localhost/assets/xsl/tabela_propriedades.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
-
+        if($chamada == 0){
+            $xslfile = "http://localhost/assets/xsl/tabela_propriedades(nonUsers).xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        } else {
+            $xslfile = "http://localhost/assets/xsl/tabela_propriedades.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+        }
+        
         $result = $this->sendQuery($query, $xslfile);
-
         print_r($result);
     }
 
