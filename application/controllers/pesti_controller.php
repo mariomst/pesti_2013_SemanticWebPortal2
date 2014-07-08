@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 3.5
+ * Versão 3.6
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -159,14 +159,13 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . 'UNION {?classeMae a:equivalentClass ?classe2}}}}';
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
-        if($chamada == 0){
+        if ($chamada == 0) {
             //Ficheiro XSL a ser usado para a transformação do XML
             $xslfile = "http://localhost/assets/xsl/lista_classes(nonUsers).xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
             //Enviar a query e o ficheiro XSL para o método privado
             $result = $this->sendQuery($query, $xslfile);
             print_r($result);
-        }
-        else if ($chamada == 1) {
+        } else if ($chamada == 1) {
             //Ficheiro XSL a ser usado para a transformação do XML
             $xslfile = "http://localhost/assets/xsl/lista_classes.xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
             //Enviar a query e o ficheiro XSL para o método privado
@@ -256,13 +255,12 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        if($chamada == 0){          
+        if ($chamada == 0) {
             $xslfile = "http://localhost/assets/xsl/lista_subclasses(nonUsers).xsl";      // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML            
-        }
-        else if($chamada == 1){         
+        } else if ($chamada == 1) {
             $xslfile = "http://localhost/assets/xsl/lista_subclasses.xsl";  // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML           
         }
-        
+
         //Enviar a query e o ficheiro XSL para o método privado
         $result = $this->sendQuery($query, $xslfile);
         print_r($result);
@@ -361,11 +359,11 @@ class PESTI_Controller extends CI_Controller {
             $xslfile = "http://localhost/assets/xsl/tabela_subclasses(nonUsers).xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
         } else {
             $xslfile = "http://localhost/assets/xsl/tabela_subclasses.xsl";     // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML                     
-        }  
-        
+        }
+
         //Enviar a query e o ficheiro XSL para o método privado
         $result = $this->sendQuery($query, $xslfile);
-        print_r($result);  
+        print_r($result);
     }
 
     public function getMembers($classe, $chamada) {
@@ -400,7 +398,7 @@ class PESTI_Controller extends CI_Controller {
         //Ficheiro XSL a ser usado para a transformação do XML
         if ($chamada == 0) {
             $xslfile = "http://localhost/assets/xsl/tabela_membros(nonUsers).xsl";
-        }else if ($chamada == 1) {
+        } else if ($chamada == 1) {
             $xslfile = "http://localhost/assets/xsl/tabela_membros.xsl";    // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
         } else if ($chamada == 2) {
             $xslfile = 'http://localhost/assets/xsl/select_membros.xsl';    // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML
@@ -688,27 +686,85 @@ class PESTI_Controller extends CI_Controller {
         $ontologyURI = $this->getURI();
         $fullURI = '<' . $ontologyURI . '#' . $classe . '>';
 
-        $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ';
-        $query = $query . 'prefix owl: <http://www.w3.org/2002/07/owl#> ';
-        $query = $query . 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
-        $query = $query . 'prefix xml: <http://www.w3.org/2001/XMLSchema#> ';
-        $query = $query . 'SELECT (strafter(str(?onProperty), "#") AS ?Propriedade) (strafter(str(?someValuesFrom), "#") AS ?AlgunsValoresDe) ';
-        $query = $query . 'WHERE{ ';
-        $query = $query . $fullURI . ' rdfs:subClassOf ?blankNode. ';
-        $query = $query . '?blankNode owl:onProperty ?onProperty. ';
-        $query = $query . '{?blankNode owl:someValuesFrom ?someValuesFrom. FILTER (!isBlank(?someValuesFrom)). } ';
-        $query = $query . 'UNION  ';
-        $query = $query . '{?blankNode owl:onDataRange ?someValuesFrom. }}  ';
-        $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
+        //Query das propriedades simples das classes
+        $query1 = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ';
+        $query1 = $query1 . 'prefix owl: <http://www.w3.org/2002/07/owl#> ';
+        $query1 = $query1 . 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ';
+        $query1 = $query1 . 'prefix xml: <http://www.w3.org/2001/XMLSchema#> ';
+        $query1 = $query1 . 'SELECT (strafter(str(?onProperty), "#") AS ?Propriedade) (strafter(str(?someValuesFrom), "#") AS ?AlgunsValoresDe) ';
+        $query1 = $query1 . 'WHERE{ ';
+        $query1 = $query1 . $fullURI . ' rdfs:subClassOf ?blankNode. ';
+        $query1 = $query1 . '?blankNode owl:onProperty ?onProperty. ';
+        $query1 = $query1 . '{?blankNode owl:someValuesFrom ?someValuesFrom. FILTER (!isBlank(?someValuesFrom)). } ';
+        $query1 = $query1 . 'UNION  ';
+        $query1 = $query1 . '{?blankNode owl:onDataRange ?someValuesFrom. }}  ';
+        $query1 = $query1 . '&output=xml&stylesheet=xml-to-html.xsl';
+
+
+        //Query das propriedades complexas das classes
+        $query2 = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl:  <http://www.w3.org/2002/07/owl#> prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix xml:  <http://www.w3.org/2001/XMLSchema#> ';
+        $query2 = $query2 . 'select distinct (strafter(str(?p), "#") AS ?Propriedade) (?v AS ?AlgunsValoresDe) (strafter(str(?x), "#") AS ?Restricao){ ';
+        $query2 = $query2 . $fullURI . ' owl:equivalentClass/owl:intersectionOf/rdf:rest*/rdf:first ?c . ';
+        $query2 = $query2 . '{ ?c owl:onProperty ?p. ?c owl:hasValue ?u. BIND(strafter(str(?u), "#") AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?u. FILTER (!isBlank(?u)). BIND(strafter(str(?u), "#") AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:length ?u. BIND(xml:length AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minLength ?u. BIND(xml:minLength AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxLength ?u. BIND(xml:maxLength AS ?x).	BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:pattern ?u. BIND(xml:pattern AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:enumeration ?u. BIND(xml:enumeration AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:whiteSpace ?u. BIND(xml:whiteSpace AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:maxInclusive ?u. BIND(xml:maxInclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:maxExclusive ?u. BIND(xml:maxExclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minExclusive ?u. BIND(xml:minExclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minInclusive ?u. BIND(xml:minInclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:totalDigits ?u. BIND(xml:totalDigits AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:fractionDigits ?u. BIND(xml:fractionDigits AS ?x). BIND(str(?u) AS ?v). }';
+        $query2 = $query2 . 'UNION { ?c owl:unionOf/rdf:rest*/rdf:first ?e. { ?e owl:onProperty ?p. ?e owl:hasValue ?u. BIND(strafter(str(?u), "#") AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?e owl:onProperty ?p. ?e owl:someValuesFrom ?u. FILTER (!isBlank(?u)). BIND(strafter(str(?u), "#") AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:length ?u. BIND(xml:length AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minLength ?u. BIND(xml:minLength AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxLength ?u. BIND(xml:maxLength AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:pattern ?u. BIND(xml:pattern AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:enumeration ?u. BIND(xml:enumeration AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:whiteSpace ?u. BIND(xml:whiteSpace AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxInclusive ?u. BIND(xml:maxInclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxExclusive ?u. BIND(xml:maxExclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minExclusive ?u. BIND(xml:minExclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minInclusive ?u. BIND(xml:minInclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:totalDigits ?u. BIND(xml:totalDigits AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:fractionDigits ?u. BIND(xml:fractionDigits AS ?x). BIND(str(?u) AS ?v). }} ';
+        $query2 = $query2 . 'UNION { ?c owl:unionOf/rdf:rest*/rdf:first/owl:intersectionOf/rdf:rest*/rdf:first ?e. { ?e owl:onProperty ?p. ?e owl:hasValue ?u. BIND(strafter(str(?u), "#") AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?e owl:onProperty ?p. ?e owl:someValuesFrom ?u. FILTER (!isBlank(?u)). BIND(strafter(str(?u), "#") AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:length ?u. BIND(xml:length AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minLength ?u. BIND(xml:minLength AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxLength ?u. BIND(xml:maxLength AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:pattern ?u. BIND(xml:pattern AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:enumeration ?u. BIND(xml:enumeration AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:whiteSpace ?u. BIND(xml:whiteSpace AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxInclusive ?u. BIND(xml:maxInclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxExclusive ?u. BIND(xml:maxExclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minExclusive ?u. BIND(xml:minExclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minInclusive ?u. BIND(xml:minInclusive AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:totalDigits ?u. BIND(xml:totalDigits AS ?x). BIND(str(?u) AS ?v). } ';
+        $query2 = $query2 . 'UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:fractionDigits ?u. BIND(xml:fractionDigits AS ?x). BIND(str(?u) AS ?v). }}}';
+        $query2 = $query2 . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
         if ($chamada == 0) {
-            $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes(nonUsers).xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+            $xslfile1 = "http://localhost/assets/xsl/tabela_propriedades_classes(nonUsers).xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
+            $xslfile2 = "http://localhost/assets/xsl/tabela_propriedades_classes(nonUsers)2.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
         } else {
-            $xslfile = "http://localhost/assets/xsl/tabela_propriedades_classes.xsl";  
+            $xslfile1 = "http://localhost/assets/xsl/tabela_propriedades_classes.xsl";
+            $xslfile2 = "http://localhost/assets/xsl/tabela_propriedades_classes2.xsl";
         }
-        
-        $result = $this->sendQuery($query, $xslfile);
+
+        $result1 = $this->sendQuery($query1, $xslfile1);
+        $result2 = $this->sendQuery($query2, $xslfile2);
+
+        $result = '<table border=1>';
+        $result = $result . $result1 . $result2;
+        $result = $result . '</table>';
+
         print_r($result);
     }
 
@@ -760,14 +816,14 @@ class PESTI_Controller extends CI_Controller {
         $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
 
         //Ficheiro XSL a ser usado para a transformação do XML
-        if($chamada == 0){
+        if ($chamada == 0) {
             $xslfile = "http://localhost/assets/xsl/tabela_propriedades(nonUsers).xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
-        } else if($chamada == 1) {
+        } else if ($chamada == 1) {
             $xslfile = "http://localhost/assets/xsl/tabela_propriedades.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
         } else {
             $xslfile = "http://localhost/assets/xsl/lista_propriedadesMembros.xsl";   // -> endereço do ficheiro XSL a ser utilizado para a transformação do XML para HTML.
         }
-        
+
         $result = $this->sendQuery($query, $xslfile);
         print_r($result);
     }

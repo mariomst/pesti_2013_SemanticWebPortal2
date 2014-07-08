@@ -6,17 +6,10 @@
     <xsl:output method="html" indent="no"/>
 
     <xsl:template match="sp:sparql">
-        <tr>
-            <th>Propriedade</th>
-            <th>Valor</th>
-			<th>Restrições</th>
-            <th>Opções</th>
-        </tr>
         <xsl:apply-templates/>
     </xsl:template>
 
     <xsl:template match="sp:result">
-
         <tr>
             <td>
                 <a> 
@@ -34,7 +27,9 @@
             <td>
                 <xsl:value-of select="normalize-space(sp:binding[@name='AlgunsValoresDe'])"/>
             </td>
-			<td></td>
+			<td>
+				<xsl:value-of select="normalize-space(sp:binding[@name='Restricao'])"/>
+			</td>
             <td>
                 <button>
                     <xsl:attribute name="onclick">
@@ -45,8 +40,6 @@
                     <img src="/assets/images/magnifying_glass.png" width="24px" height="24px"/>
                 </button>                
             </td>
-           
         </tr>
     </xsl:template>
-
 </xsl:stylesheet>
