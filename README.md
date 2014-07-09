@@ -1,17 +1,14 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
-
 ### Para que serve este repositório? ###
 
-* Quick summary
-+ Versão 5.7.4
-    *  Podem consultar o Changelog na [Wiki](https://bitbucket.org/mario_1090626/pesti_web_semantics_portal/wiki/Home). 
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Código-fonte do projecto "Desenvolvimento de infraestrutura para portal baseado em tecnologias de Web Semântica"
++ Versão atual 5.9.0
 
 ### Como faço para configurar? ###
 
-+ Configuração:
++ **Configuração**:
+    *  O projecto pode ser aberto utilizando a aplicação [NetBeans IDE](https://netbeans.org/).
     *  O projecto pode ser posto directamente na pasta htdocs se estiver a utilizar um [Servidor XAMPP](https://www.apachefriends.org/index.html) ou na pasta www se estiver a utilizar um [Servidor WAMP](http://www.wampserver.com/en/).
     *  Como é utilizado o [Framework CodeIgniter](http://ellislab.com/codeigniter), caso seja necessário a alteração dos caminhos para as páginas PHP, pode ser facilmente ajustado no ficheiro "routes.php" localizado em "/application/config/". Exemplo:
 
@@ -26,16 +23,9 @@ $route['register'] = 'user_controller/viewRegister';
 ```
 
 
-+ Dependências:
-    *  Para executar o Website, é necessário ter um [Servidor Fuseki](https://jena.apache.org/documentation/serving_data/) e indicar o endereço (ex: http://localhost:3030/data) no ficheiro "pesti_controller.php".
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
++ **Dependências**:
+    *  Para executar o Website, é necessário ter um [Servidor Fuseki](https://jena.apache.org/documentation/serving_data/) e indicar o endereço (ex: http://localhost:3030/data) no ficheiro "connections.ini" localizado em "/configs/".
+    *  É necessário também a utilização de um [Servidor XAMPP](https://www.apachefriends.org/index.html) ou um [Servidor WAMP](http://www.wampserver.com/en/).
 
 ### Quem devo falar em caso de dúvidas? ###
 
