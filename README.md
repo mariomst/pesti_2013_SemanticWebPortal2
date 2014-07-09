@@ -3,7 +3,7 @@
 ### Para que serve este repositório? ###
 
 * Código-fonte do projecto "Desenvolvimento de infraestrutura para portal baseado em tecnologias de Web Semântica"
-+ Versão atual 5.9.0
++ Versão atual 5.9.1
 
 ### Como faço para configurar? ###
 
