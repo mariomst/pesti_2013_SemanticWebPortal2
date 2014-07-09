@@ -27,6 +27,7 @@
  * - botaoAdd                       Adiciona mais um select (página de inserção de propriedades).
  * - consultMember                  Ao clicar num dos membros na div de contéudo, faz um pedido para obter informações sobre esse membro.
  * - consultClass                   Ao clicar num dos elementos da árvore, faz um pedido para obter informações sobre essa classe.
+ * - consultProperty                Ao clicnar numa das propriedades da árvore, faz um pedido para obter as informações sobre essa propriedade.
  * - appendMembers                  Adiciona a div de conteúdo os membros pertencentes à classe.
  * - appendSubClasses               Adiciona a div de conteúdo as subclasses pertencentes à classe.
  * - appendProperties               Adiciona a div de conteúdo as propriedades associadas à classe.
@@ -149,7 +150,15 @@ function logout()
 function getUserName(userCookie)
 {
     var username = userCookie.split("=");
-    return username[1];
+    if(username[1] == ";")
+    {
+        username = "";
+        return username;
+    }
+    else
+    {
+        return username[1];
+    }
 }
 
 function selectedElement(target)
@@ -378,8 +387,6 @@ function createPropertySelects(element, type)
             $('#' + parentID).append(htmlRange);
         }
     }
-
-    //alert(value);
 }
 
 function getRecursiveRange(subclasse, type, obj)

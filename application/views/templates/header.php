@@ -28,8 +28,6 @@ header('Content-Type: text/html; charset=utf-8');
 
         <div id="header_menu" class="header_menu">
             <a href="/index.php/home" class="link_menu">Home</a>&nbsp;
-            <!--<a href="/index.php/login" id="login" class="link_menu" onclick="createModelessWindow('/index.php/login');
-                    return false;">Login</a>&nbsp;-->
             <a id="user_session" class="link_menu"></a>
             <a href="/index.php/register" class="link_menu nyroModal">Registar</a>&nbsp;
             <a href="/index.php/about" class="link_menu">About</a>            
@@ -42,11 +40,12 @@ header('Content-Type: text/html; charset=utf-8');
             });
 
             $(window).ready(function()
-            {        
+            {                        
                 var user = getUserName(document.cookie);
                 
                 if (user == null)
                 {
+                    //Criação do cookie que armazena o utilizador.
                     document.cookie = "user=;";
                 }
                 
