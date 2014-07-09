@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.8
+ * Versão 2.9
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -149,7 +149,21 @@ function logout()
 
 function getUserName(userCookie)
 {
-    var username = userCookie.split("=");
+    var array = userCookie.split(";");
+    var stringUser = "null";
+    
+    var lengthArray = array.length;
+   
+    for(i = 0; i < lengthArray; i++)
+    {
+        if(array[i].indexOf("user=") != -1)
+        {
+            stringUser = array[i];
+        }
+    }
+    
+    var username = stringUser.split("=");
+    
     if(username[1] == ";")
     {
         username = "";

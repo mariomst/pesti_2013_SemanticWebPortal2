@@ -52,7 +52,7 @@
                     </td>            
                 </xsl:when>
                 <xsl:otherwise>
-                    <td> - </td>
+                    <td>  </td>
                 </xsl:otherwise>
             </xsl:choose>                
         
@@ -63,7 +63,7 @@
                     </td>                                                                                       
                 </xsl:when>
                 <xsl:otherwise>                    
-                    <td> - </td>
+                    <td>  </td>
                 </xsl:otherwise>
             </xsl:choose>   
 
@@ -75,7 +75,7 @@
                     </td>                                                                                       
                 </xsl:when>
                 <xsl:otherwise>                    
-                    <td> - </td>
+                    <td>  </td>
                 </xsl:otherwise>
             </xsl:choose>    
             
