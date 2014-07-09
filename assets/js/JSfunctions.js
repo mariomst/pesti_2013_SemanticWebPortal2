@@ -339,7 +339,7 @@ function createPropertySelects(element, type)
         //Se a propriedade não tiver range
         if (data_2 == "") {
             //Se for a primeira vez que está a ir buscar todos os elementos, guarda numa variável para da próxima vez não ter de fazer imensas vezes o mesmo pedido ao fuseki
-            if (todosElementos == null) {
+            if (todosElementos == "null") {
                 var dataSubClasses = null;
                 var htmlRange = "<td id=\"range\"><select id=\"drop\">";
                 htmlRange = htmlRange + "<option id=\"Nenhum\" value=\"Nenhum\">-</option>";
@@ -566,8 +566,6 @@ function consultProperty(propertyLabel)
     var result_uri = requestInformation(obj, url_uri);
     //Obter o comentário da propriedade seleccionada.
     var result_comment = requestInformation(obj, url_comment);
-    //Obter o range da propriedade seleccionada.
-    var result_range = requestInformation(obj, url_range);
     //Obter info da propriedade seleccionada.
     var result_info = requestInformation(obj, url_info);
 
@@ -583,10 +581,7 @@ function consultProperty(propertyLabel)
         $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
     }
-    $(".content").append("<br><b>Range da propriedade " + propertyLabel + ":</b> " + result_range);
-
-    $(".content").append("<br><br><b>URI</b>: <a href=\"" + result_uri + "#" + result_range + "\" onclick=\"callFunctionsFromLink('" + result_range + "',2);return false;\">" + result_uri + "#" + result_range + "</a><br><br>");
-
+    
     $(".content").append("<b>Mais informa&ccedil;&otilde;es da propriedade: " + propertyLabel + ":</b><br><br>");
 
     $(".content").append(result_info);
