@@ -64,8 +64,10 @@
                         
                         if(result == "1")
                         {
+                            var userLevel = checkUserLevel(username);
                             $("#errorMessage3").hide();
                             document.cookie="user="+username+";";
+                            document.cookie="level="+userLevel+";";
                             $.nmTop().close();
                         }
                         else

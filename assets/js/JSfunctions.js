@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 2.9
+ * Versão 3.0
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -12,9 +12,13 @@
  * - XMLHttpObject                  Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
  * - requestInformation             Envia o pedido http ao controller e retorna o resultado do XSLT.
  * - requestUpdate                  Envia o pedido post ao controller para a inserção de informação.
+ * - checkUserExists                Verifica se o utilizador existe na TDB.
  * - checkUser                      Verifica se o utilizador e password estão correctos.
- * - logout                         Termina a sessão do utilizador e causa um refresh a página.
+ * - checkUserLevel                 Verifica o nível do utilizador para definir as opções a serem mostradas.
  * - getUserName                    Vai buscar o nome do utilizador logado pelo cookie existente.
+ * - getUserLevel                   Vai buscar o nível do utilizador logado pelo cookie existente.
+ * - insertNewUser                  Inserção de um novo utilizador na ontologia de utilizadores.
+ * - logout                         Termina a sessão do utilizador e causa um refresh a página.
  * - selectedElement                Recebe o elemento, aplica a classe de iluminação e executa as funções cleanDIV e consultClass.
  * - cleanDIV                       Apenas faz limpeza da informação contida numa DIV.
  * - constructClassTree             Faz o pedido ao controller e ao receber a lista de classes constroi a respectiva árvore.
@@ -127,6 +131,20 @@ function requestUpdate(obj, url)
     return result;
 }
 
+function checkUserExists(username)
+{
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
+    var obj = XMLHttpObject();
+
+    //URL da função existente no Controller.
+    var url_checkUser = "/index.php/checkUser/" + username + "/0";
+
+    //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
+    var result = requestInformation(obj, url_checkUser);   
+
+    return result;
+}
+
 function checkUser(username, password)
 {
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
@@ -141,10 +159,18 @@ function checkUser(username, password)
     return result;
 }
 
-function logout()
+function checkUserLevel(username)
 {
-    document.cookie = "user=;";
-    location.reload();
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
+    var obj = XMLHttpObject();    
+    
+    //URL da função existente no Controller.
+    var url_checkUserLevel = "/index.php/getUserAccessLevel/" + username;
+
+    //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
+    var result = requestInformation(obj, url_checkUserLevel);
+
+    return result;
 }
 
 function getUserName(userCookie)
@@ -173,6 +199,55 @@ function getUserName(userCookie)
     {
         return username[1];
     }
+}
+
+function getUserLevel(userCookie)
+{
+    var array = userCookie.split(";");
+    var stringLevel = "null";
+    
+    var lengthArray = array.length;
+   
+    for(i = 0; i < lengthArray; i++)
+    {
+        if(array[i].indexOf("level=") != -1)
+        {
+            stringLevel = array[i];
+        }
+    }
+    
+    var userlevel = stringLevel.split("=");   
+    
+    if(userlevel[1] == ";")
+    {
+        userlevel = "";
+        return userlevel;
+    }
+    else
+    {
+        return userlevel[1];
+    }
+}
+
+function insertNewUser(username, password)
+{
+    //Endereço para chamada da função do controller.
+    var url_insertNewUser = "/index.php/insertNewUser/" + username + "/" + password;
+
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //Pedido POST para a inserção da propriedade temVisibilidade.
+    var update = requestUpdate(obj, url_insertNewUser);
+
+    return update;
+}
+
+function logout()
+{
+    document.cookie = "user=;";
+    document.cookie = "level=;";
+    location.reload();
 }
 
 function selectedElement(target)
@@ -214,13 +289,13 @@ function cleanDIV(target)
 function constructClassTree(target)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);    
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
     obj = XMLHttpObject();
 
     //Impressão diferente se a sessão estiver activa ou não.
-    if (user == "")
+    if (userLevel == "")
     {
         //URL da função existente no Controller. 
         url_Classes = "/index.php/listClasses/0";
@@ -241,7 +316,7 @@ function constructClassTree(target)
 function getSubClasses(parentClass)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     obj = XMLHttpObject();
@@ -256,7 +331,7 @@ function getSubClasses(parentClass)
     url_subClasses = url_subClasses + classLabel;
 
     //Impressão diferente se a sessão estiver activa ou não.
-    if (user == "")
+    if (userLevel == "")
     {
         url_subClasses = url_subClasses + "/0";
     }
@@ -464,10 +539,10 @@ function deleteSelect(element)
 function consultMember(memberLabel)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     //Variáveis utilizadas
-    if (user != "")
+    if (userLevel != "")
     {
         url_properties = "/index.php/getMemberProperty/" + memberLabel + "/1";
     }
@@ -496,7 +571,7 @@ function consultMember(memberLabel)
 
     $(".content").append("<br><br><b>Coment&aacute;rio:</b> " + result_comment);
 
-    if (user != "")
+    if (userLevel != "")
     {
         $(".content").append("<br>&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + memberLabel + "', 2)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
@@ -508,10 +583,10 @@ function consultMember(memberLabel)
 function consultClass(classLabel)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     //Endereços utilizados.
-    if (user == "")
+    if (userLevel == "")
     {
         url_members = "/index.php/getMembers/" + classLabel + "/0";
         url_subclasses = "/index.php/getSubClasses/" + classLabel + "/0";
@@ -547,7 +622,7 @@ function consultClass(classLabel)
 
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
 
-    if (user != "")
+    if (userLevel != "")
     {
         $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_comment,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
@@ -564,7 +639,7 @@ function consultClass(classLabel)
 function consultProperty(propertyLabel)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     //Endereços utilizados.
     var url_uri = "/index.php/printURI";
@@ -590,13 +665,13 @@ function consultProperty(propertyLabel)
 
     $(".content").append("<b>Coment&aacute;rio:</b> " + result_comment + "<br>");
 
-    if (user != "")
+    if (userLevel != "")
     {
         $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
     }
     
-    $(".content").append("<b>Mais informa&ccedil;&otilde;es da propriedade: " + propertyLabel + ":</b><br><br>");
+    $(".content").append("<br><b>Mais informa&ccedil;&otilde;es da propriedade: " + propertyLabel + ":</b><br><br>");
 
     $(".content").append(result_info);
 }
@@ -604,7 +679,7 @@ function consultProperty(propertyLabel)
 function appendMembers(obj, classLabel, url_insert_member, url_members)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     $(".content").append("<b>Membros pertencentes &agrave; classe:</b>");
 
@@ -614,7 +689,7 @@ function appendMembers(obj, classLabel, url_insert_member, url_members)
     //Adição dos resultado na DIV
     $(".content").append(result_members);
 
-    if (user != "")
+    if (userLevel != "")
     {
         $(".content").append("&#8594; Para adicionar um novo membro, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_member,'" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
@@ -624,7 +699,7 @@ function appendMembers(obj, classLabel, url_insert_member, url_members)
 function appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     $(".content").append("<br><br><b>SubClasses pertencentes &agrave; classe:</b>");
 
@@ -634,7 +709,7 @@ function appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses)
     //Adição dos resultado na DIV
     $(".content").append(result_subclasses);
 
-    if (user != "")
+    if (userLevel != "")
     {
         $(".content").append("&#8594; Para adicionar uma nova subclasse da classe " + classLabel + ", clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow(url_insert_subclass, '" + classLabel + "', 1)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button>");
@@ -644,7 +719,7 @@ function appendSubClasses(obj, classLabel, url_insert_subclass, url_subclasses)
 function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
 {
     //Verifica se existe uma sessão ativa
-    var user = getUserName(document.cookie);
+    var userLevel = getUserLevel(document.cookie);
 
     $(".content").append("<br><br><b>Propriedades associadas &agrave; classe:</b>");
 
@@ -654,7 +729,7 @@ function appendProperties(obj, label, url_insert_prop, url_properties, tipo)
         $(".content").append(result_properties);
     }
 
-    if (user != "")
+    if (userLevel != "")
     {
         if (tipo == "1")
         {

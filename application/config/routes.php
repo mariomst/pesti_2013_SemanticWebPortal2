@@ -49,8 +49,11 @@ $route['insertClass'] = 'pesti_controller/viewInsertClass';
 $route['insertClass/(:any)'] = 'pesti_controller/viewInsertClass/$1';
 
 //Páginas relacionadas com utilizadores
-$route['checkUser/(:any)'] = 'user_controller/checkUserExists/$1';
+$route['listUsers'] = 'user_controller/listUsers';
+$route['checkUser/(:any)/(:any)'] = 'user_controller/checkUserExists/$1/$2';
 $route['checkUserPassword/(:any)/(:any)'] = 'user_controller/checkUserPassword/$1/$2';
+$route['getUserAccessLevel/(:any)'] = 'user_controller/getUserAccessLevel/$1';
+$route['insertNewUser/(:any)/(:any)'] = 'user_controller/insertNewUser/$1/$2';
 
 //Páginas De Inserção de Dados na Ontologia
 $route['insertData/(:any)/(:any)/(:any)'] = 'pesti_controller/insertData/$1/$2/$3';
