@@ -4,7 +4,7 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 3.6
+ * Versão 3.7
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
@@ -30,7 +30,7 @@
  * deteleData               -> eliminação de dados da ontologia.
  *
  * Funções Privadas:
- * readConfigFile           -> carrega o endereço do servidor Fuseki apartir de um ficheiro .ini
+ * readConfigFile           -> carrega o endereço do servidor Fuseki apartir de um ficheiro .ini.
  * insertClass              -> inserção de uma classe.
  * insertMember             -> inserção de um membro.
  * insertCommentary         -> inserção de um comentário.
@@ -947,6 +947,7 @@ class PESTI_Controller extends CI_Controller {
     private function readConfigFile() {
         //Definição das variáveis a serem usadas.
         $configFile = 'configs/connections.ini';
+        $url_fuseki = '';
         $result = array();
 
         if (!file_exists($configFile)) {
@@ -961,17 +962,19 @@ class PESTI_Controller extends CI_Controller {
                 $line = fgets($readFile);
                 //Ignorar comentários no ficheiro de configuração.
                 if (strpos($line, "Comentário") == false) {
-                    $result[] = $line;
+                        $result[] = $line;                          
                 }
             }
             //Fechar o ficheiro.
             fclose($readFile);
             //Remover o que não interessa.
-            foreach ($result as $line) {
+            foreach ($result as $line) {                             
                 $aux = explode("=", $line);
-                $url_fuseki = $url_fuseki . $aux[1];
-                //Remover possíveis espaços
-                $url_fuseki = preg_replace('/\s+/', '', $url_fuseki);
+                if($aux[0] == 'url_fuseki ' || $aux[0] == 'dataset '){
+                    $url_fuseki = $url_fuseki . $aux[1];
+                    //Remover possíveis espaços
+                    $url_fuseki = preg_replace('/\s+/', '', $url_fuseki);
+                }
             }
 
             $this->url_db_consult = $url_fuseki . "/sparql";
