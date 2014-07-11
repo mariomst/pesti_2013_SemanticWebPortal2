@@ -8,7 +8,7 @@
     <xsl:template match="sp:sparql">
         <table border="1">
             <tr>
-                <th>Utilizadores</th>
+                <th width="90%">Utilizadores</th>
                 <th>Opções</th>
             </tr>
             <xsl:apply-templates/>
@@ -16,16 +16,31 @@
     </xsl:template>
 
     <xsl:template match="sp:result">
-        <tr>
-            <td>                
-                <xsl:value-of select="normalize-space(sp:binding[@name='Utilizador'])"/>
-            </td>            
-            <td> 
-                <button>                    
-                    <img src="/assets/images/delete.png" width="24px" height="24px"/>
-                </button>
-            </td>
-        </tr>
+        <xsl:variable name="user">
+            <xsl:value-of select="normalize-space(sp:binding[@name='Utilizador'])"/>
+        </xsl:variable>       
+        
+        <xsl:choose>
+            <xsl:when test="$user = 'Admin'">                
+            </xsl:when>
+            <xsl:otherwise>
+                <tr>
+                    <td align="center">                
+                        <xsl:value-of select="normalize-space(sp:binding[@name='Utilizador'])"/>
+                    </td>            
+                    <td align="center"> 
+                        <button>     
+                            <xsl:attribute name="onclick">
+                                <xsl:text>deleteUser('</xsl:text>
+                                <xsl:value-of select="normalize-space(sp:binding[@name='Utilizador'])"/>
+                                <xsl:text>');</xsl:text>
+                            </xsl:attribute>               
+                            <img src="/assets/images/delete.png" width="24px" height="24px"/>
+                        </button>
+                    </td>
+                </tr>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
 </xsl:stylesheet>

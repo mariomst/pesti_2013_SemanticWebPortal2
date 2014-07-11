@@ -9,7 +9,7 @@ header('Content-Type: text/html; charset=utf-8');
             <?php echo $title ?>
         </title>
     </head>
-    <body>
+    <body>       
         <!-- Funções JavaScript -->
         <script type="text/javascript" src="/assets/js/jquery.min.js"></script>
         <script type="text/javascript" src="/assets/js/JSfunctions.js"></script>
@@ -30,7 +30,8 @@ header('Content-Type: text/html; charset=utf-8');
             <a href="/index.php/home" class="link_menu">Home</a>&nbsp;
             <a id="user_session" class="link_menu"></a>
             <a id="user_register" href="/index.php/register" class="link_menu" onclick="createModelessWindow('/index.php/register');return false;">Registar</a>&nbsp;
-            <a href="/index.php/about" class="link_menu">About</a>            
+            <a href="/index.php/about" class="link_menu">About</a>&nbsp;
+            <a id="adminPage" href="/index.php/admin" class="link_menu">Administração</a>&nbsp;
         </div>
 
         <script type="text/javascript">
@@ -47,9 +48,8 @@ header('Content-Type: text/html; charset=utf-8');
                 {
                     //Criação do cookie que armazena o utilizador.
                     document.cookie = "user=;";
-                    document.cookie = "level=;"
-                    alert(document.cookie);
-                }
+                    document.cookie = "level=;";
+                }                            
 
                 var user = getUserName(document.cookie);
 
@@ -60,6 +60,7 @@ header('Content-Type: text/html; charset=utf-8');
                     $("#user_session").attr("onclick", "createModelessWindow('/index.php/login');return false;");
                     $("#user_session").append("Login");
                     $("#user_register").show();
+                    $("#adminPage").hide();
                 }
                 else
                 {
@@ -68,6 +69,14 @@ header('Content-Type: text/html; charset=utf-8');
                     $("#user_session").attr("onclick", "logout();return false;");
                     $("#user_session").append("Logout");
                     $("#user_register").hide();
+                    $("#adminPage").hide();
+                }
+                
+                var userLevel = checkUserLevel(user);
+                
+                if(userLevel == "0")
+                {
+                    $("#adminPage").show();
                 }
             });
         </script>

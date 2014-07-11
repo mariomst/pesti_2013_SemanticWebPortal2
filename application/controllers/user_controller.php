@@ -67,6 +67,21 @@ class User_Controller extends CI_Controller {
 
         $this->load->view('pages/' . $page, $data);
     }
+    
+    public function viewAdmin($page = 'admin') {
+        if (!file_exists('application/views/pages/' . $page . '.php')) {
+            show_404();
+        }
+
+        //O titulo da página é definida no array $data
+        $title = 'Semantic Web Portal - ' . ucfirst($page);
+        $data['title'] = $title;
+
+        //carregar os views na ordem que devem ser exibidos
+        $this->load->view('templates/header', $data);
+        $this->load->view('pages/' . $page, $data);
+        $this->load->view('templates/footer', $data);
+    }
 
     public function checkUserExists($user, $chamada) {
         /*
@@ -216,7 +231,33 @@ class User_Controller extends CI_Controller {
     }
 
     public function deleteUser($user) {
-        //Ainda não desenvolvido.
+        /*
+         * Query para inserção de um novo utilizador
+         * 
+         * DELETE DATA{
+         * <URI da ontologia#username> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual>.
+         * <URI da ontologia#username> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.semanticweb.org/ontologies/2014/6/OntologiaDeUtilizadores.owl#Utilizador>.
+         * <URI da ontologia#username> <http://www.semanticweb.org/ontologies/2014/6/OntologiaDeUtilizadores.owl#temPassword> "INSERIR VALOR AQUI".
+         * <URI da ontologia#username> <http://www.semanticweb.org/ontologies/2014/6/OntologiaDeUtilizadores.owl#temNivel> "INSERIR VALOR AQUI".}
+         */
+        
+        $accessLevel = $this->getUserAccessLevel($user);
+        $password = $this->getUserPassword($user);
+        
+        //Definição das URIs necessárias.
+        $userURI = $this->getURI($user);
+        $userType = $this->getUri('Utilizador');
+        $passwordURI = $this->getURI('temPassword');
+        $levelURI = $this->getURI('temNivel');
+
+        $arguments = $userURI . ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual>. ';
+        $arguments = $arguments . $userURI . ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ' . $userType . '. ';
+        $arguments = $arguments . $userURI . $passwordURI . '"' . $password . '".';
+        $arguments = $arguments . $userURI . $levelURI . '"' . $accessLevel . '".';
+
+        $result = $this->sendDelete($arguments);
+
+        return $result;
     }
 
     //================= Funções Privadas ====================

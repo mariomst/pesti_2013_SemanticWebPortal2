@@ -55,7 +55,7 @@
                         $('.checkpass').removeClass('error_textbox');
                         $("#errorMessage3").hide();
                     }
-                }
+                };
 
                 button.onclick = function()
                 {
@@ -70,6 +70,9 @@
                     }
                     else
                     {
+                        //Remover caso exista, espaços no nome do user.
+                        username = username.replace(/\s/g, "");
+
                         var checkUser = checkUserExists(username);
                         if (checkUser == 1)
                         {
@@ -84,6 +87,7 @@
                             $("#errorMessage4").hide();
                         }
                     }
+                    
                     if (password == "")
                     {
                         $('.passwordbox').addClass('error_textbox');
@@ -94,6 +98,7 @@
                         $('.error_textbox').removeClass('error_textbox');
                         $("#errorMessage2").hide();
                     }
+                    
                     if (password != checkpswd)
                     {
                         $('.passwordbox').addClass('error_textbox');
@@ -107,8 +112,11 @@
                         $("#errorMessage3").hide();
                     }
 
-                    if(username != "" && password != "" && password == checkpswd)
+                    if (username != "" && password != "" && password == checkpswd)
                     {
+                        //Remover caso exista, espaços no nome do user.
+                        username = username.replace(/\s/g, "");
+
                         var checkUser = checkUserExists(username);
                         if (checkUser == 1)
                         {
@@ -121,18 +129,15 @@
                             $('.error_textbox').removeClass('error_textbox');
                             $("#errorMessage1").hide();
                             $("#errorMessage4").hide();
-                            
-                            //Remover caso exista, espaços no nome do user.
-                            username = username.replace(/\s/g, "");
-                            
+
                             var update = insertNewUser(username, password);
-                            
-                            if(update == 1)
+
+                            if (update == 1)
                             {
                                 alert("Info: Registo de novo utilizador com sucesso!");
                                 var userLevel = checkUserLevel(username);
-                                document.cookie="user="+username+";";
-                                document.cookie="level="+userLevel+";";
+                                document.cookie = "user=" + username + ";";
+                                document.cookie = "level=" + userLevel + ";";
                                 $.nmTop().close();
                             }
                             else
@@ -143,7 +148,7 @@
                     }
 
                     return false;
-                }
+                };
             });
         </script>
 

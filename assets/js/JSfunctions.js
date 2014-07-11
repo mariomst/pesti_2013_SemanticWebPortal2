@@ -131,6 +131,21 @@ function requestUpdate(obj, url)
     return result;
 }
 
+function consultUsers(target)
+{
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+
+    //URL do método existente no Controller. 
+    var url_listUsers = "/index.php/listUsers";
+
+    //Chama o método que faz um pedido "get" ao servidor e recebe o resultado.
+    var result = requestInformation(obj, url_listUsers);
+
+    //Faz append no elemento que tenha o ID obtido na linha anterior.
+    $(target).append(result);
+}
+
 function checkUserExists(username)
 {
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
@@ -243,11 +258,30 @@ function insertNewUser(username, password)
     return update;
 }
 
+function deleteUser(username)
+{
+    //Variáveis utilizadas
+    var url_deleteUser = "/index.php/deleteUser/" + username;
+    
+    //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
+    var obj = XMLHttpObject();
+    
+    //Pedido POST para a eliminação do utilizador.
+    var update = requestUpdate(obj, url_deleteUser);
+
+    if (update != 1)
+    {
+        alert("Erro: Eliminacao do user sem sucesso...");
+    }
+    
+    location.reload();
+}
+
 function logout()
 {
     document.cookie = "user=;";
     document.cookie = "level=;";
-    location.reload();
+    window.location.href = "http://localhost/";
 }
 
 function selectedElement(target)
@@ -1195,11 +1229,11 @@ function createModalWindow(url, classParent, chamada)
         closeOnEscape: true,
         sizes:
                 {
-                    inittW: 600,
+                    inittW: 700,
                     initH: 600,
-                    w: 600,
+                    w: 700,
                     h: 600,
-                    minW: 600,
+                    minW: 700,
                     minH: 600
                 },
         callbacks:
@@ -1245,7 +1279,7 @@ function createModelessWindow(url)
         modal: false,
         sizes:
                 {
-                    minW: 500,
+                    minW: 700,
                     minH: 500
                 },
         callbacks:
