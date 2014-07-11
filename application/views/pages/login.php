@@ -30,6 +30,7 @@
             $(document).ready(function()
             {
                 var button = document.getElementById("Entrar");
+                var address = window.location.hostname;
 
                 button.onclick = function()
                 {
@@ -40,7 +41,7 @@
                     {
                         $('.textbox').addClass('error_textbox');
                         $("#errorMessage1").show();
-                        
+
                     }
                     else
                     {
@@ -48,9 +49,9 @@
                         $("#errorMessage1").hide();
                     }
                     if (password == "")
-                    {                        
+                    {
                         $('.passwordbox').addClass('error_textbox');
-                        $("#errorMessage2").show(); 
+                        $("#errorMessage2").show();
                     }
                     else
                     {
@@ -58,16 +59,18 @@
                         $("#errorMessage2").hide();
                     }
 
-                    if(username != "" && password != "")
+                    if (username != "" && password != "")
                     {
                         var result = checkUser(username, password);
-                        
-                        if(result == "1")
+
+                        if (result == "1")
                         {
                             var userLevel = checkUserLevel(username);
                             $("#errorMessage3").hide();
-                            document.cookie="user="+username+";";
-                            document.cookie="level="+userLevel+";";
+                            document.cookie = "user=" + username + "; ";
+                            document.cookie = "level=" + userLevel + "; ";
+                            document.cookie = "domain=" + address + "; ";
+                            document.cookie = "path=/index.php/; ";
                             $.nmTop().close();
                         }
                         else

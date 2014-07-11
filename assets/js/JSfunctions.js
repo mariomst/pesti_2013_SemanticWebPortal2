@@ -279,9 +279,13 @@ function deleteUser(username)
 
 function logout()
 {
-    document.cookie = "user=;";
-    document.cookie = "level=;";
-    window.location.href = "http://localhost/";
+    var address = window.location.hostname;
+    
+    document.cookie = "user=; ";
+    document.cookie = "level=; ";
+    document.cookie = "domain=" + address + "; ";
+    document.cookie = "path=/index.php/; ";
+    window.location.href = "http://" + address + "/index.php/home";
 }
 
 function selectedElement(target)
@@ -1286,7 +1290,8 @@ function createModelessWindow(url)
                 {
                     afterClose: function()
                     {
-                        location.reload();
+                        //location.reload();
+                        window.location.href = "http://" + window.location.hostname + "/index.php/home";
                     }
                 }
     });

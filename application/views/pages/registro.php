@@ -37,6 +37,7 @@
             {
                 var button = document.getElementById("Inserir");
                 var check = document.getElementById("checkpswd");
+                var address = window.location.hostname;
 
                 check.onblur = function()
                 {
@@ -136,8 +137,10 @@
                             {
                                 alert("Info: Registo de novo utilizador com sucesso!");
                                 var userLevel = checkUserLevel(username);
-                                document.cookie = "user=" + username + ";";
-                                document.cookie = "level=" + userLevel + ";";
+                                document.cookie = "user=" + username + "; ";
+                                document.cookie = "level=" + userLevel + "; ";
+                                document.cookie = "domain=" + address + "; ";
+                                document.cookie = "path=/index.php/; ";
                                 $.nmTop().close();
                             }
                             else
