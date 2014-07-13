@@ -4,15 +4,17 @@
  * PESTI Controller 
  * - Vai ser o centro de todos os pedidos da aplicação Web;
  *
- * Versão 3.7
+ * Versão 3.8
  *
  * @author Mário Teixeira    1090626     1090626@isep.ipp.pt     
  * @author Marta Graça       1100640     1100640@isep.ipp.pt
  * 
  * ========================================================   Descrição:   =============================================================================================
  * Funções Públicas:
- * view                     -> criação da view Página Principal
- * view_insertClass         -> criação da view Inserção
+ * view                     -> criação da view Página Principal.
+ * view_insertClass         -> criação da view Inserção.
+ * getFusekiAddress         -> retorna o url do Servidor Fuseki.
+ * checkFusekiStatus        ->  Verifica se o servidor Fuseki esta vivo fazendo um pedido GET.
  * listClasses              -> recebe um xml com as super classes existentes na ontologia e retorna uma lista.
  * listSubClasses           -> recebe um xml com as subclasses da classe indicada e retorna uma lista.
  * selectSubClasses         -> recebe um xml com as subclasses da classe indicada e retorna opções para inserir num select.
@@ -95,6 +97,30 @@ class PESTI_Controller extends CI_Controller {
         $this->load->view('pages/' . $page, $data);
     }
 
+    public function getFusekiAddress(){
+        print_r($this->url_db_consult);
+    }
+    
+    public function checkFusekiStatus() {
+        /*
+         * Query usada para o pedido GET
+         * 
+         * ASK WHERE { ?s ?p ?o }
+         */
+
+        $query = 'ASK WHERE { ?s ?p ?o }';
+        $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
+
+        //xml recebe o resultado da query enviada para o Fuseki.
+        $xml = $this->pesti_model->consultar_data($this->url_db_consult, $query);
+
+        if (!$xml) {
+            print_r(0);
+        } else {
+            print_r(1);
+        }
+    }
+    
     /********************************************************
      *                  CONSULTAS FUSEKI                    *
      ********************************************************/

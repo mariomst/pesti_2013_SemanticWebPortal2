@@ -118,6 +118,11 @@ body
     height:99%;
 }
 
+span
+{
+    cursor:pointer;
+}
+
 span:hover
 {
     color: #CC6600;

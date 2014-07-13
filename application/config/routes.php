@@ -80,6 +80,10 @@ $route['selectSubClasses/(:any)'] = 'pesti_controller/selectSubClasses/$1';
 
 //Outros
 $route['printURI'] = 'pesti_controller/printURI';
+$route['getFusekiUserTDB'] = 'user_controller/getFusekiAddress';
+$route['getFusekiTDB'] = 'pesti_controller/getFusekiAddress';
+$route['checkFusekiUserTDB'] = 'user_controller/checkFusekiStatus';
+$route['checkFusekiTDB'] = 'pesti_controller/checkFusekiStatus';
 $route['(:any)'] = 'pesti_controller/view/$1';
 
 /* End of file routes.php */

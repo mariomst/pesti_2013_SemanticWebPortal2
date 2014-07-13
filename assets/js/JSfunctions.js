@@ -2,7 +2,7 @@
  * Funções JavaScript
  * - Este ficheiro vai conter funções para as páginas HTML.
  *
- * Versão 3.0
+ * Versão 3.1
  *
  * Autores
  * - Mário Teixeira  1090626     1090626@isep.ipp.pt
@@ -12,6 +12,8 @@
  * - XMLHttpObject                  Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
  * - requestInformation             Envia o pedido http ao controller e retorna o resultado do XSLT.
  * - requestUpdate                  Envia o pedido post ao controller para a inserção de informação.
+ * - splitFusekiURL                 Retorna o url e dataset do fuseki em celulas de uma tabela.
+ * - checkFusekiServer              Retorna uma imagem de acordo com o estado do servidor fuseki.
  * - checkUserExists                Verifica se o utilizador existe na TDB.
  * - checkUser                      Verifica se o utilizador e password estão correctos.
  * - checkUserLevel                 Verifica o nível do utilizador para definir as opções a serem mostradas.
@@ -131,6 +133,51 @@ function requestUpdate(obj, url)
     return result;
 }
 
+function splitFusekiURL(url, response)
+{
+    var elements = url.split("/");
+    var url = elements[2];
+    var dataset = elements[3];
+
+    var tr = document.createElement('tr');
+    var td_url = document.createElement('td');
+    var td_ds = document.createElement('td');
+    var td_status = document.createElement('td');
+
+    td_url.setAttribute('align', 'center');
+    td_ds.setAttribute('align', 'center');
+    td_status.setAttribute('align', 'center');
+
+    var url_text = document.createTextNode('http://' + url);
+    var ds_text = document.createTextNode(dataset);
+    var status = checkFusekiServer(response);
+
+    td_url.appendChild(url_text);
+    tr.appendChild(td_url);
+    td_ds.appendChild(ds_text);
+    tr.appendChild(td_ds);
+    td_status.appendChild(status);
+    tr.appendChild(td_status);
+
+    document.getElementById('fusekiServers').appendChild(tr);
+}
+
+function checkFusekiServer(response)
+{
+    if (response == 1)
+    {
+        var img = document.createElement("img");
+        img.src = "/assets/images/light_green.png";
+    }
+    else
+    {
+        var img = document.createElement("img");
+        img.src = "/assets/images/light_red.png";
+    }
+
+    return img;
+}
+
 function consultUsers(target)
 {
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
@@ -155,7 +202,7 @@ function checkUserExists(username)
     var url_checkUser = "/index.php/checkUser/" + username + "/0";
 
     //Chama a função que faz um pedido "get" ao servidor e recebe o resultado.
-    var result = requestInformation(obj, url_checkUser);   
+    var result = requestInformation(obj, url_checkUser);
 
     return result;
 }
@@ -177,8 +224,8 @@ function checkUser(username, password)
 function checkUserLevel(username)
 {
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
-    var obj = XMLHttpObject();    
-    
+    var obj = XMLHttpObject();
+
     //URL da função existente no Controller.
     var url_checkUserLevel = "/index.php/getUserAccessLevel/" + username;
 
@@ -192,20 +239,20 @@ function getUserName(userCookie)
 {
     var array = userCookie.split(";");
     var stringUser = "null";
-    
+
     var lengthArray = array.length;
-   
-    for(i = 0; i < lengthArray; i++)
+
+    for (i = 0; i < lengthArray; i++)
     {
-        if(array[i].indexOf("user=") != -1)
+        if (array[i].indexOf("user=") != -1)
         {
             stringUser = array[i];
         }
     }
-    
+
     var username = stringUser.split("=");
-    
-    if(username[1] == ";")
+
+    if (username[1] == ";")
     {
         username = "";
         return username;
@@ -220,20 +267,20 @@ function getUserLevel(userCookie)
 {
     var array = userCookie.split(";");
     var stringLevel = "null";
-    
+
     var lengthArray = array.length;
-   
-    for(i = 0; i < lengthArray; i++)
+
+    for (i = 0; i < lengthArray; i++)
     {
-        if(array[i].indexOf("level=") != -1)
+        if (array[i].indexOf("level=") != -1)
         {
             stringLevel = array[i];
         }
     }
-    
-    var userlevel = stringLevel.split("=");   
-    
-    if(userlevel[1] == ";")
+
+    var userlevel = stringLevel.split("=");
+
+    if (userlevel[1] == ";")
     {
         userlevel = "";
         return userlevel;
@@ -262,10 +309,10 @@ function deleteUser(username)
 {
     //Variáveis utilizadas
     var url_deleteUser = "/index.php/deleteUser/" + username;
-    
+
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser.
     var obj = XMLHttpObject();
-    
+
     //Pedido POST para a eliminação do utilizador.
     var update = requestUpdate(obj, url_deleteUser);
 
@@ -273,14 +320,14 @@ function deleteUser(username)
     {
         alert("Erro: Eliminacao do user sem sucesso...");
     }
-    
+
     location.reload();
 }
 
 function logout()
 {
     var address = window.location.hostname;
-    
+
     document.cookie = "user=; ";
     document.cookie = "level=; ";
     document.cookie = "domain=" + address + "; ";
@@ -327,7 +374,7 @@ function cleanDIV(target)
 function constructClassTree(target)
 {
     //Verifica se existe uma sessão ativa
-    var userLevel = getUserLevel(document.cookie);    
+    var userLevel = getUserLevel(document.cookie);
 
     //Retorna o objecto XMLHttpRequest de acordo com o tipo de browser. 
     obj = XMLHttpObject();
@@ -708,7 +755,7 @@ function consultProperty(propertyLabel)
         $(".content").append("&#8594; Para adicionar ou actualizar o coment&aacute;rio, clique no bot&atildeo ");
         $(".content").append("<button type=\"button\" onclick=\"createModalWindow('" + url_insert_comment + "','" + propertyLabel + "', 3)\"><img src=\"/assets/images/add.png\" width=\"24px\" height=\"24px\"/></button><br><br>");
     }
-    
+
     $(".content").append("<br><b>Mais informa&ccedil;&otilde;es da propriedade: " + propertyLabel + ":</b><br><br>");
 
     $(".content").append(result_info);

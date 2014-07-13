@@ -79,6 +79,7 @@ class PESTI_Model extends CI_Model {
         curl_setopt($post, CURLOPT_URL, $url_db);
         curl_setopt($post, CURLOPT_POSTFIELDS, $query);
         curl_setopt($post, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($post, CURLOPT_CONNECTTIMEOUT, 2);
 
         $response = curl_exec($post);
 

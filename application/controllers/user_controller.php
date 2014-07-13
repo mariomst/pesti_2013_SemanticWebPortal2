@@ -4,7 +4,7 @@
  * User Controller
  * - Vai tratar dos pedidos da aplicação Web relacionados com utilizadores.
  * 
- * Versão 1.3
+ * Versão 1.4
  * 
  * @author Mário Teixeira   1090626     1090626@isep.ipp.pt
  * @author Marta Graça      1100640     1100640@isep.ipp.pt
@@ -24,6 +24,8 @@
  * listUsers            ->  Lista todos os utlizadores existentes na base de dados.
  * insertNewUser        ->  Insere um novo utilizador na base de dados.
  * deleteUser           ->  Elimina um utilizador da base de dados.
+ * getFusekiAddress     ->  Retorna o url do Servidor Fuseki.
+ * checkFusekiStatus    ->  Verifica se o servidor Fuseki esta vivo fazendo um pedido GET.
  * 
  * Funções Privadas:
  * readConfigFile       ->  Carrega o endereço do servidor Fuseki apartir de um ficheiro .ini.
@@ -67,7 +69,7 @@ class User_Controller extends CI_Controller {
 
         $this->load->view('pages/' . $page, $data);
     }
-    
+
     public function viewAdmin($page = 'admin') {
         if (!file_exists('application/views/pages/' . $page . '.php')) {
             show_404();
@@ -101,7 +103,7 @@ class User_Controller extends CI_Controller {
         //xml recebe o resultado da query enviada para o Fuseki.
         $xml = $this->sendQuery($query);
 
-        //Processamento directo do XML para retirar a URI.
+        //Processamento directo do XML para retirar a resposta.
         $aux_1 = explode("<boolean>", $xml);
         $aux_2 = $aux_1[1];
         $exists = explode("</boolean>", $aux_2);
@@ -111,13 +113,10 @@ class User_Controller extends CI_Controller {
         } else {
             $result = 0;
         }
-        
-        if($chamada == 1)
-        {
+
+        if ($chamada == 1) {
             return $result;
-        }
-        else
-        {
+        } else {
             print_r($result);
         }
     }
@@ -240,10 +239,10 @@ class User_Controller extends CI_Controller {
          * <URI da ontologia#username> <http://www.semanticweb.org/ontologies/2014/6/OntologiaDeUtilizadores.owl#temPassword> "INSERIR VALOR AQUI".
          * <URI da ontologia#username> <http://www.semanticweb.org/ontologies/2014/6/OntologiaDeUtilizadores.owl#temNivel> "INSERIR VALOR AQUI".}
          */
-        
+
         $accessLevel = $this->getUserAccessLevel($user);
         $password = $this->getUserPassword($user);
-        
+
         //Definição das URIs necessárias.
         $userURI = $this->getURI($user);
         $userType = $this->getUri('Utilizador');
@@ -258,6 +257,30 @@ class User_Controller extends CI_Controller {
         $result = $this->sendDelete($arguments);
 
         return $result;
+    }
+
+    public function getFusekiAddress() {
+        print_r($this->url_user_db_sparql);
+    }
+
+    public function checkFusekiStatus() {
+        /*
+         * Query usada para o pedido GET
+         * 
+         * ASK WHERE { ?s ?p ?o }
+         */
+
+        $query = 'ASK WHERE { ?s ?p ?o }';
+        $query = $query . '&output=xml&stylesheet=xml-to-html.xsl';
+
+        //xml recebe o resultado da query enviada para o Fuseki.
+        $xml = $this->sendQuery($query);
+
+        if (!$xml) {
+            print_r(0);
+        } else {
+            print_r(1);
+        }
     }
 
     //================= Funções Privadas ====================
