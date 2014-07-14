@@ -380,7 +380,7 @@ function constructClassTree(target)
     obj = XMLHttpObject();
 
     //Impressão diferente se a sessão estiver activa ou não.
-    if (userLevel == "")
+    if (userLevel == "" || userLevel == 1)
     {
         //URL da função existente no Controller. 
         url_Classes = "/index.php/listClasses/0";
@@ -416,7 +416,7 @@ function getSubClasses(parentClass)
     url_subClasses = url_subClasses + classLabel;
 
     //Impressão diferente se a sessão estiver activa ou não.
-    if (userLevel == "")
+    if (userLevel == "" || userLevel == 1)
     {
         url_subClasses = url_subClasses + "/0";
     }

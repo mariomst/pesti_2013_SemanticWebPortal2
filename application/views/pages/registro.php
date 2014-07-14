@@ -24,10 +24,12 @@
             <b>Confirma a Password:</b>
             <input type="password" id="checkpswd" class="checkpass" style="width: 280px"/>
             <br>
+            <span id="infoMessage1"><br>Info: Todos os espaços serão removidos no processo de registo (e.g Test User -> TestUser)<br><br></span>
             <span id="errorMessage1" style="display: none;"><font color="red">Erro: O campo Username está vazio!</font><br></span>
             <span id="errorMessage2" style="display: none;"><font color="red">Erro: O campo Password está vazio!</font><br></span>
             <span id="errorMessage3" style="display: none;"><font color="red">Erro: As passwords não são iguais!</font><br></span>
             <span id="errorMessage4" style="display: none;"><font color="red">Erro: Username já existe!</font><br></span>
+            
             <button id="Inserir">Inserir</button>
         </form>
 
@@ -117,7 +119,8 @@
                     {
                         //Remover caso exista, espaços no nome do user.
                         username = username.replace(/\s/g, "");
-
+                        password = password.replace(/\s/g, "");
+                                                
                         var checkUser = checkUserExists(username);
                         if (checkUser == 1)
                         {

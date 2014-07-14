@@ -36,7 +36,11 @@
                         </xsl:attribute>
                         <img src="/assets/images/eye_closed.png" width="24px" height="24px"/>
                     </button>
-                    
+                    <span class="classMae" id="{generate-id()}" onclick="selectedElement(this)">
+                        <b>
+                            <xsl:value-of select="normalize-space(sp:binding[@name='localName'])"/>
+                        </b>
+                    </span>    
                 </li>   
             </xsl:when>
             <xsl:otherwise>
