@@ -900,7 +900,7 @@ class PESTI_Controller extends CI_Controller {
      *                  ELIMINAÇÕES FUSEKI                  *
      ********************************************************/
 
-    public function deleteData(nk$type, $subject, $object) {
+    public function deleteData($type, $subject, $object) {
         //Obter a URI da ontologia.
         $full_uri = $this->getURI();
         //Criação da URI do sujeito.
