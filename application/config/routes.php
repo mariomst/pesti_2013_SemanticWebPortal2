@@ -45,8 +45,8 @@ if (!defined('BASEPATH'))
 $route['default_controller'] = 'pesti_controller/view';
 $route['login'] = 'user_controller/viewLogin';
 $route['register'] = 'user_controller/viewRegister';
-$route['insertClass'] = 'pesti_controller/viewInsertClass';
-$route['insertClass/(:any)'] = 'pesti_controller/viewInsertClass/$1';
+$route['insertClass'] = 'insert_controller/viewInsertClass';
+$route['insertClass/(:any)'] = 'insert_controller/viewInsertClass/$1';
 $route['admin'] = 'user_controller/viewAdmin';
 
 //Páginas relacionadas com utilizadores
@@ -58,28 +58,28 @@ $route['insertNewUser/(:any)/(:any)'] = 'user_controller/insertNewUser/$1/$2';
 $route['deleteUser/(:any)'] = 'user_controller/deleteUser/$1';
 
 //Páginas De Inserção de Dados na Ontologia
-$route['insertData/(:any)/(:any)/(:any)'] = 'pesti_controller/insertData/$1/$2/$3';
-$route['insertProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_controller/insertProperty/$1/$2/$3/$4/$5/$6';
+$route['insertData/(:any)/(:any)/(:any)'] = 'insert_controller/insertData/$1/$2/$3';
+$route['insertProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'insert_controller/insertProperty/$1/$2/$3/$4/$5/$6';
 
 //Páginas De Eliminação de Dados na Ontologia
-$route['deleteData/(:any)/(:any)/(:any)'] = 'pesti_controller/deleteData/$1/$2/$3';
-$route['deleteProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'pesti_controller/deleteProperty/$1/$2/$3/$4/$5/$6';
+$route['deleteData/(:any)/(:any)/(:any)'] = 'delete_Controller/deleteData/$1/$2/$3';
+$route['deleteProperty/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'delete_Controller/deleteProperty/$1/$2/$3/$4/$5/$6';
 
 //Páginas De listar informação da Ontologia
-$route['listClasses/(:any)'] = 'pesti_controller/listClasses/$1';
-$route['listSubClasses/(:any)/(:any)'] = 'pesti_controller/listSubClasses/$1/$2';
-$route['getSubClasses/(:any)/(:any)'] = 'pesti_controller/getSubClasses/$1/$2';
-$route['getMembers/(:any)/(:any)'] = 'pesti_controller/getMembers/$1/$2';
-$route['getProperties'] = 'pesti_controller/getProperties';
-$route['getPropertyRange/(:any)/(:any)'] = 'pesti_controller/getPropertyRange/$1/$2';
-$route['getPropertyInfo/(:any)'] = 'pesti_controller/getPropertyInfo/$1';
-$route['getClassProperty/(:any)/(:any)'] = 'pesti_controller/getClassProperty/$1/$2';
-$route['getMemberProperty/(:any)/(:any)'] = 'pesti_controller/getMemberProperty/$1/$2';
-$route['getComment/(:any)'] = 'pesti_controller/getComment/$1';
-$route['selectSubClasses/(:any)'] = 'pesti_controller/selectSubClasses/$1';
+$route['listClasses/(:any)'] = 'read_controller/listClasses/$1';
+$route['listSubClasses/(:any)/(:any)'] = 'read_controller/listSubClasses/$1/$2';
+$route['getSubClasses/(:any)/(:any)'] = 'read_controller/getSubClasses/$1/$2';
+$route['getMembers/(:any)/(:any)'] = 'read_controller/getMembers/$1/$2';
+$route['getProperties'] = 'read_controller/getProperties';
+$route['getPropertyRange/(:any)/(:any)'] = 'read_controller/getPropertyRange/$1/$2';
+$route['getPropertyInfo/(:any)'] = 'read_controller/getPropertyInfo/$1';
+$route['getClassProperty/(:any)/(:any)'] = 'read_controller/getClassProperty/$1/$2';
+$route['getMemberProperty/(:any)/(:any)'] = 'read_controller/getMemberProperty/$1/$2';
+$route['getComment/(:any)'] = 'read_controller/getComment/$1';
+$route['selectSubClasses/(:any)'] = 'read_controller/selectSubClasses/$1';
 
 //Outros
-$route['printURI'] = 'pesti_controller/printURI';
+$route['printURI'] = 'read_controller/printURI';
 $route['getFusekiUserTDB'] = 'user_controller/getFusekiAddress';
 $route['getFusekiTDB'] = 'pesti_controller/getFusekiAddress';
 $route['checkFusekiUserTDB'] = 'user_controller/checkFusekiStatus';
