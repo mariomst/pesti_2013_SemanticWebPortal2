@@ -1,0 +1,52 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix owl:  <http://www.w3.org/2002/07/owl#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xml:  <http://www.w3.org/2001/XMLSchema#>
+select distinct 
+(strafter(str(?p), "#") AS ?Propriedade) 
+(?v AS ?AlgunsValoresDe) 
+(strafter(str(?x), "#") AS ?Restricao)
+{
+$argumento1 owl:equivalentClass/owl:intersectionOf/rdf:rest*/rdf:first ?c .
+{ ?c owl:onProperty ?p. ?c owl:hasValue ?u. BIND(strafter(str(?u), "#") AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?u. FILTER (!isBlank(?u)). BIND(strafter(str(?u), "#") AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:length ?u. BIND(xml:length AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minLength ?u. BIND(xml:minLength AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxLength ?u. BIND(xml:maxLength AS ?x).	BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:pattern ?u. BIND(xml:pattern AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:enumeration ?u. BIND(xml:enumeration AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:whiteSpace ?u. BIND(xml:whiteSpace AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:maxInclusive ?u. BIND(xml:maxInclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:maxExclusive ?u. BIND(xml:maxExclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minExclusive ?u. BIND(xml:minExclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minInclusive ?u. BIND(xml:minInclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:totalDigits ?u. BIND(xml:totalDigits AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:fractionDigits ?u. BIND(xml:fractionDigits AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:unionOf/rdf:rest*/rdf:first ?e. { ?e owl:onProperty ?p. ?e owl:hasValue ?u. BIND(strafter(str(?u), "#") AS ?v). }
+UNION { ?e owl:onProperty ?p. ?e owl:someValuesFrom ?u. FILTER (!isBlank(?u)). BIND(strafter(str(?u), "#") AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:length ?u. BIND(xml:length AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minLength ?u. BIND(xml:minLength AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxLength ?u. BIND(xml:maxLength AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:pattern ?u. BIND(xml:pattern AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:enumeration ?u. BIND(xml:enumeration AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:whiteSpace ?u. BIND(xml:whiteSpace AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxInclusive ?u. BIND(xml:maxInclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxExclusive ?u. BIND(xml:maxExclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minExclusive ?u. BIND(xml:minExclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minInclusive ?u. BIND(xml:minInclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:totalDigits ?u. BIND(xml:totalDigits AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:fractionDigits ?u. BIND(xml:fractionDigits AS ?x). BIND(str(?u) AS ?v). }}
+UNION { ?c owl:unionOf/rdf:rest*/rdf:first/owl:intersectionOf/rdf:rest*/rdf:first ?e. { ?e owl:onProperty ?p. ?e owl:hasValue ?u. BIND(strafter(str(?u), "#") AS ?v). }
+UNION { ?e owl:onProperty ?p. ?e owl:someValuesFrom ?u. FILTER (!isBlank(?u)). BIND(strafter(str(?u), "#") AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:length ?u. BIND(xml:length AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minLength ?u. BIND(xml:minLength AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxLength ?u. BIND(xml:maxLength AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:pattern ?u. BIND(xml:pattern AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:enumeration ?u. BIND(xml:enumeration AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:whiteSpace ?u. BIND(xml:whiteSpace AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxInclusive ?u. BIND(xml:maxInclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:maxExclusive ?u. BIND(xml:maxExclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minExclusive ?u. BIND(xml:minExclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:minInclusive ?u. BIND(xml:minInclusive AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h.	?h xml:totalDigits ?u. BIND(xml:totalDigits AS ?x). BIND(str(?u) AS ?v). }
+UNION { ?c owl:onProperty ?p. ?c owl:someValuesFrom ?j. ?j owl:withRestrictions ?f. ?f rdf:rest*/rdf:first ?h. ?h xml:fractionDigits ?u. BIND(xml:fractionDigits AS ?x). BIND(str(?u) AS ?v). }}}

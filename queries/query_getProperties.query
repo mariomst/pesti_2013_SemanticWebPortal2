@@ -1,0 +1,11 @@
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+select distinct (strafter(str(?prop), "#") AS ?Propriedades) (strafter(str(?car), "#") AS ?Caracteristica)
+where{{?prop rdfns:type owl:ObjectProperty.
+{?prop rdfns:type owl:FunctionalProperty. BIND(owl:FunctionalProperty AS ?car).}
+UNION{FILTER NOT EXISTS{?prop rdfns:type owl:FunctionalProperty.}}} ';
+UNION{?prop rdfns:type owl:DatatypeProperty. BIND(owl:DatatypeProperty AS ?value).
+{?prop rdfns:type owl:FunctionalProperty. BIND(owl:FunctionalProperty AS ?car).}
+UNION{FILTER NOT EXISTS{?prop rdfns:type owl:FunctionalProperty.}}}}

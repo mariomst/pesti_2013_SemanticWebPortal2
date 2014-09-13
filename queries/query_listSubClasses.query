@@ -1,0 +1,35 @@
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX a: <http://www.w3.org/2002/07/owl#>
+
+select distinct ?subClasse (strafter(str(?subClasse), "#") AS ?localName) (STR(?v) AS ?visivel)
+
+where{
+{
+{?subClasse rdf:subClassOf $argumento1 .
+?subClasse $argumento2 ?v.
+$argumento1 rdfns:type a:Class .}
+UNION
+{?subClasse rdf:subClassOf $argumento1 .
+FILTER NOT EXISTS {?subClasse $argumento2 ?v.}
+$argumento1 rdfns:type a:Class .}
+}
+UNION
+{
+{
+?subClasse a:equivalentClass ?classe1 .
+?classe1 a:intersectionOf ?classe2 .
+?classe2 rdfns:first $argumento1 .
+$argumento1 rdfns:type a:Class .
+?subClasse $argumento2 ?v.
+}
+UNION
+{
+?subClasse a:equivalentClass ?classe1 .
+?classe1 a:intersectionOf ?classe2 .
+?classe2 rdfns:first $argumento1 .
+$argumento1 rdfns:type a:Class .
+FILTER NOT EXISTS {?subClasse $argumento2 ?v.}
+}
+}
+}

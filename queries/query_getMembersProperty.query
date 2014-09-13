@@ -1,0 +1,8 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+SELECT distinct (strafter(str(?propriedade), "#") AS ?Propriedade) ?Valor ?valor (strafter(str(?tipo), "#") AS ?Tipo)
+WHERE{ $argumento1 rdf:type owl:NamedIndividual.{ ?propriedade rdf:type owl:ObjectProperty.
+BIND(owl:ObjectProperty as ?tipo). $argumento1 ?propriedade ?valor. BIND(STRAFTER(STR(?valor), "#") AS ?Valor).
+}UNION{ ?propriedade rdf:type owl:DatatypeProperty. BIND(owl:DatatypeProperty as ?tipo).
+$argumento1 ?propriedade ?valor. BIND(STR(?valor) AS ?Valor).}}

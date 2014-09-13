@@ -1,0 +1,4 @@
+ASK WHERE 
+{ 
+$argumento1 a $argumento2 
+}

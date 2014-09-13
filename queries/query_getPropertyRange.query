@@ -1,0 +1,35 @@
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+select 
+(strafter(str(?value), "#") AS ?AlgunsValoresDe) 
+(strafter(str(?type), "#") AS ?Tipo)
+
+where{
+{ 
+$argumento1 rdfns:type owl:ObjectProperty. 
+BIND(owl:ObjectProperty AS ?type).
+{
+$argumento1 rdf:range ?value.
+}
+UNION
+{
+FILTER NOT EXISTS
+{
+$argumento1 rdf:range ?value.
+}
+}
+}
+UNION
+{
+$argumento1 rdfns:type owl:DatatypeProperty. 
+BIND(owl:DatatypeProperty AS ?type).
+{
+$argumento1 rdf:range ?value.
+}
+UNION
+{
+FILTER NOT EXISTS
+{
+$argumento1 rdf:range ?value.}}}}

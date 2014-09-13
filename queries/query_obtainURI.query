@@ -1,0 +1,10 @@
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX a: <http://www.w3.org/2002/07/owl#>
+SELECT ?classeMae (strafter(str(?classeMae), "#") AS ?localName)
+WHERE { ?classeMae rdfns:type a:Class.
+FILTER (!isBlank(?classeMae))
+FILTER NOT EXISTS{
+{?classeMae rdf:subClassOf ?classe.
+?classe rdfns:type a:Class.}
+UNION {?classeMae a:equivalentClass ?classe2}}}

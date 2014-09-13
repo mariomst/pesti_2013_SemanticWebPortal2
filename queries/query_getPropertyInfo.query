@@ -1,0 +1,37 @@
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl: <http://www.w3.org/2002/07/owl#>
+select distinct (strafter(str(?ran), "#") AS ?Range) (strafter(str(?type), "#") AS ?Tipo) (strafter(str(?char), "#") AS ?Caracteristicas) (strafter(str(?prop2), "#") AS ?Propriedade2)
+where{{{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type). { $argumento1 rdf:range ?ran.}
+UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}} FILTER NOT EXISTS{ $argumento1 rdfns:type owl:FunctionalProperty.}.
+FILTER NOT EXISTS{ $argumento1 rdfns:type owl:TransitiveProperty.}. FILTER NOT EXISTS{ $argumento1 rdfns:type owl:SymmetricProperty.}.
+FILTER NOT EXISTS{ $argumento1 rdfns:type owl:AsymmetricProperty.}. FILTER NOT EXISTS{ $argumento1 rdfns:type owl:InverseFunctionalProperty.}.
+FILTER NOT EXISTS{ $argumento1 rdfns:type owl:IrreflexiveProperty.}. FILTER NOT EXISTS{ $argumento1 rdfns:type owl:ReflexiveProperty.}.
+FILTER NOT EXISTS{ $argumento1 owl:inverseOf ?prop2.}. FILTER NOT EXISTS{ $argumento1 owl:equivalentProperty ?prop2.}.
+FILTER NOT EXISTS{ $argumento1 rdf:subPropertyOf ?prop2.}. }UNION{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type).
+$argumento1 rdfns:type owl:FunctionalProperty. BIND(owl:FunctionalProperty AS ?char). { $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}
+UNION{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type). $argumento1 rdfns:type owl:TransitiveProperty. BIND(owl:TransitiveProperty AS ?char).
+{ $argumento1 rdf:range ?ran.}UNION{FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:ObjectProperty.
+BIND(owl:ObjectProperty AS ?type). $argumento1 rdfns:type owl:SymmetricProperty. BIND(owl:SymmetricProperty AS ?char). { $argumento1 rdf:range ?ran.}
+UNION{FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type).
+$argumento1 rdfns:type owl:AsymmetricProperty. BIND(owl:SymmetricProperty AS ?char). { $argumento1 rdf:range ?ran.} UNION
+{FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type).
+$argumento1 rdfns:type owl:InverseFunctionalProperty. BIND(owl:InverseFunctionalProperty AS ?char). { $argumento1 rdf:range ?ran.} UNION
+{FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type).
+$argumento1 rdfns:type owl:IrreflexiveProperty. BIND(owl:IrreflexiveProperty AS ?char). { $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}
+UNION{ $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type). $argumento1 rdfns:type owl:ReflexiveProperty. BIND(owl:ReflexiveProperty AS ?char).
+{ $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}} UNION { $argumento1 rdfns:type owl:ObjectProperty.
+BIND(owl:ObjectProperty AS ?type). $argumento1 owl:inverseOf ?prop2. BIND(owl:inverseOf AS ?char). { $argumento1 rdf:range ?ran.} UNION
+{FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}} UNION { $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type).
+$argumento1 owl:equivalentProperty ?prop2. BIND(owl:equivalentProperty AS ?char). { $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}
+UNION { $argumento1 rdfns:type owl:ObjectProperty. BIND(owl:ObjectProperty AS ?type). $argumento1 rdf:subPropertyOf ?prop2. BIND(rdf:subPropertyOf AS ?char).
+{ $argumento1 rdf:range ?ran.}UNION{FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:ObjectProperty.
+BIND(owl:ObjectProperty AS ?type). $argumento1 owl:disjointWith ?prop2. BIND(owl:disjointWith AS ?char). { $argumento1 rdf:range ?ran.}
+UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}}UNION{{ $argumento1 rdfns:type owl:DatatypeProperty. BIND(owl:DatatypeProperty AS ?type).
+{ $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}} FILTER NOT EXISTS{ $argumento1 rdfns:type owl:FunctionalProperty.}.
+FILTER NOT EXISTS{ $argumento1 owl:equivalentProperty ?prop2.}. FILTER NOT EXISTS{ $argumento1 rdf:subPropertyOf ?prop2.}.
+FILTER NOT EXISTS{ $argumento1 owl:disjointWith ?prop2.}. }UNION{ $argumento1 rdfns:type owl:DatatypeProperty. BIND(owl:DatatypeProperty AS ?type).
+$argumento1 rdfns:type owl:FunctionalProperty. BIND(owl:FunctionalProperty AS ?char). { $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}
+UNION{ $argumento1 rdfns:type owl:DatatypeProperty. BIND(owl:DatatypeProperty AS ?type). $argumento1 owl:equivalentProperty ?prop2. BIND(owl:equivalentProperty AS ?char).
+{ $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:DatatypeProperty.
+BIND(owl:DatatypeProperty AS ?type). $argumento1 rdf:subPropertyOf ?prop2. BIND(rdf:subPropertyOf AS ?char). { $argumento1 rdf:range ?ran.}
+UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}UNION{ $argumento1 rdfns:type owl:DatatypeProperty. BIND(owl:DatatypeProperty AS ?type).
+$argumento1 owl:disjointWith ?prop2. BIND(owl:disjointWith AS ?char). { $argumento1 rdf:range ?ran.} UNION {FILTER NOT EXISTS{ $argumento1 rdf:range ?ran.}}}}}
