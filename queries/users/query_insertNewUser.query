@@ -1,0 +1,10 @@
+PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+INSERT DATA 
+{
+$argumento1 rdfns:type owl:NamedIndividual.
+$argumento1 rdfns:type $argumento2 .
+$argumento1 $argumento3 "$argumento4" .
+$argumento1 $argumento5 "$argumento6" .
+}

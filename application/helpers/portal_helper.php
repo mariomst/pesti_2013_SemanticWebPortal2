@@ -54,6 +54,43 @@ function readConfigFile() {
     }
 }
 
+function readConfigFileUsers() {
+    //Definição das variáveis a serem usadas.
+    $configFile = 'configs/connections.ini';
+    $url_fuseki = '';
+    $result = array();
+
+    if (!file_exists($configFile)) {
+        print_r("<br><font color=\"red\"><b>Erro: O ficheiro de configura&ccedil;&atilde;o connections.ini n&atilde;o foi encontrado na pasta configs!");
+        exit;
+    } else {
+        //Abrir o ficheiro para leitura.
+        $readFile = fopen($configFile, "r");
+        //Leitura até ao fim do ficheiro.
+        while (!feof($readFile)) {
+            //Obter a linha a ser processada.
+            $line = fgets($readFile);
+            //Ignorar comentários no ficheiro de configuração.
+            if (strpos($line, "Comentário") == false) {
+                $result[] = $line;
+            }
+        }
+        //Fechar o ficheiro.
+        fclose($readFile);
+        //Remover o que não interessa.
+        foreach ($result as $line) {
+            $aux = explode("=", $line);
+            if ($aux[0] == 'url_fuseki_users ' || $aux[0] == 'dataset_users ') {
+                $url_fuseki = $url_fuseki . $aux[1];
+                //Remover possíveis espaços
+                $url_fuseki = preg_replace('/\s+/', '', $url_fuseki);
+            }
+        }
+
+        return $url_fuseki;
+    }
+}
+
 function readQueryFile($filename) {
     $queryfile = 'queries/' . $filename . '.query';
     $query = '';

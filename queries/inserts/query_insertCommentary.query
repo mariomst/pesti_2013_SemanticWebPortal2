@@ -1,0 +1,6 @@
+PREFIX rdfns: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+INSERT DATA
+{
+$argumento1 rdfns:comment $argumento2
+}

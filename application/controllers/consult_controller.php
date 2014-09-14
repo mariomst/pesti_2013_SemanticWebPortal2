@@ -13,7 +13,7 @@
 //Configurações do PHP
 error_reporting(1);         // -> 0 - desactivo; 1 - activo.
 
-class Read_Controller extends CI_Controller {
+class Consult_Controller extends CI_Controller {
     
     //Funções Públicas
     public function __construct() {

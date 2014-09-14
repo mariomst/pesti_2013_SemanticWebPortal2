@@ -136,8 +136,8 @@ function requestUpdate(obj, url)
 function splitFusekiURL(url, response)
 {
     var elements = url.split("/");
-    var url = elements[2];
-    var dataset = elements[3];
+    var url = elements[0];
+    var dataset = elements[1];   
 
     var tr = document.createElement('tr');
     var td_url = document.createElement('td');

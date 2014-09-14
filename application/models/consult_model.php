@@ -4,7 +4,7 @@
  * Consult Model
  * - Modelo responsável pelas consultas feitas à ontologia.
  * 
- * Versão 1.0
+ * Versão 1.1
  * 
  * @author Mário Teixeira   1090626     1090626@isep.ipp.pt
  * @author Marta Graça      1100640     1100640@isep.ipp.pt
@@ -46,7 +46,7 @@ class Consult_Model extends CI_Model {
     
     public function listClasses($call){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_listClasses);
+        $query = readQueryFile('consults/query_listClasses');
         
         //Obter a URI completa e adicionar à variável $temVisibilidade
         $temVisibilidade = '<' . $this->ontologyURI . '#temVisibilidade>';
@@ -76,7 +76,7 @@ class Consult_Model extends CI_Model {
     
     public function listSubClasses($classParent, $call){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_listSubClasses);
+        $query = readQueryFile('consults/query_listSubClasses');
       
         //Obter a URI completa e adicionar à variável $classParentURI e $temVisibilidade
         $classParentURI = '<' . $this->ontologyURI . '#' . $classParent . '>';
@@ -106,7 +106,7 @@ class Consult_Model extends CI_Model {
     
     public function selectSubClasses($classParent){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_selectSubClasses);
+        $query = readQueryFile('consults/query_selectSubClasses');
       
         //Obter a URI completa e adicionar a variável $classParentURI
         $classParentURI = '<' . $this->ontologyURI . '#' . $classParent . '>';
@@ -130,7 +130,7 @@ class Consult_Model extends CI_Model {
     
     public function getSubClasses($classParent, $call){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getSubClasses);
+        $query = readQueryFile('consults/query_getSubClasses');
       
         //Obter a URI completa e adicionar a variável $classParentURI
         $classParentURI = '<' . $this->ontologyURI . '#' . $classParent . '>';
@@ -158,7 +158,7 @@ class Consult_Model extends CI_Model {
 
     public function getMembers($classParent, $call){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getMembers);
+        $query = readQueryFile('consults/query_getMembers');
       
         //Obter a URI completa e adicionar a variável $classParentURI
         $classParentURI = '<' . $this->ontologyURI . '#' . $classParent . '>';
@@ -190,7 +190,7 @@ class Consult_Model extends CI_Model {
 
     public function getProperties(){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getProperties);                
+        $query = readQueryFile('consults/query_getProperties');                
         
         //Ficheiro XSL a ser usado para a transformação do XML
         $xslfile = "assets/xsl/checkboxes_propriedades.xsl"; 
@@ -208,16 +208,13 @@ class Consult_Model extends CI_Model {
     
     public function getPropertyRange($property, $call){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getPropertyRange);  
+        $query = readQueryFile('consults/query_getPropertyRange');  
         
         //Obter a URI completa e adicionar a variável $propertyURI
         $propertyURI = '<' . $this->ontologyURI . '#' . $property . '>';
         
         //Substituir na query obtida pelo ficheiro todas as instancias $argumento1
-        $tq = str_replace('$argumento1', $propertyURI, $query);
-        
-        //Ficheiro XSL a ser usado para a transformação do XML
-        $xslfile = "assets/xsl/checkboxes_propriedades.xsl"; 
+        $tq = str_replace('$argumento1', $propertyURI, $query);        
   
         $xml = $this->consultData($this->url_db_consult, $tq);
         
@@ -249,7 +246,7 @@ class Consult_Model extends CI_Model {
     
     public function getPropertyInfo($property){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getPropertyInfo);  
+        $query = readQueryFile('consults/query_getPropertyInfo');  
         
         //Obter a URI completa e adicionar a variável $propertyURI
         $propertyURI = '<' . $this->ontologyURI . '#' . $property . '>';
@@ -273,8 +270,8 @@ class Consult_Model extends CI_Model {
     
     public function getClassProperty($classParent, $call){
         //Carregar query através do ficheiro externo indicado.
-        $query1 = readQueryFile(query_getSimpleClassProperties);  
-        $query2 = readQueryFile(query_getComplexClassProperties);
+        $query1 = readQueryFile('consults/query_getSimpleClassProperties');  
+        $query2 = readQueryFile('consults/query_getComplexClassProperties');
         
         //Obter a URI completa e adicionar a variável $classParentURI
         $classParentURI = '<' . $this->ontologyURI . '#' . $classParent . '>';
@@ -311,7 +308,7 @@ class Consult_Model extends CI_Model {
     
     public function getMemberProperty($member, $call){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getMembersProperty);
+        $query = readQueryFile('consults/query_getMembersProperty');
       
         //Obter a URI completa e adicionar a variável $memberURI
         $memberURI = '<' . $this->ontologyURI . '#' . $member . '>';
@@ -341,7 +338,7 @@ class Consult_Model extends CI_Model {
     
     public function getComment($subject){
         //Carregar query através do ficheiro externo indicado.
-        $query = readQueryFile(query_getComment);
+        $query = readQueryFile('consults/query_getComment');
       
         //Obter a URI completa e adicionar a variável $subjectURI
         $subjectURI = '<' . $this->ontologyURI . '#' . $subject . '>';
@@ -375,7 +372,7 @@ class Consult_Model extends CI_Model {
     }
     
     private function getOntologyURI(){
-        $query = readQueryFile(query_obtainURI);
+        $query = readQueryFile('consults/query_obtainURI');
         
         //Variável XML recebe o resultado da query
         $xml = $this->consultData($this->url_db_consult, $query);
