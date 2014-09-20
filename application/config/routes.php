@@ -78,6 +78,9 @@ $route['getUserAccessLevel/(:any)'] = 'user_controller/getUserAccessLevel/$1';
 $route['insertNewUser/(:any)/(:any)'] = 'user_controller/insertNewUser/$1/$2';
 $route['deleteUser/(:any)'] = 'user_controller/deleteUser/$1';
 
+//Página de testes
+$route['tests'] = 'test_controller/tests';
+
 //Outros
 $route['printURI'] = 'consult_controller/printURI';
 $route['getFusekiUserTDB'] = 'user_controller/getFusekiAddress';
