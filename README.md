@@ -2,8 +2,21 @@
 
 ### Introdução ###
 
-* Código-fonte do projecto "Desenvolvimento de infraestrutura para portal baseado em tecnologias de Web Semântica"
-+ Versão atual 6.0.2
+A principal ideia subjacente a esta aplicação é melhorar a interpretação do utilizador referente a qualquer informação abarcada numa ontologia através da representação de conhecimento estruturado semanticamente. Isto é útil pois estas tecnologias são aplicadas na web de formas tão subtis ao utilizador comum que se torna difícil percecionar como tudo se interliga e funciona. Este mecanismo permite estender a rede de páginas web inserindo metadados nas suas estruturas, permitindo automatizar agentes informáticos a aceder à internet de forma mais inteligente e realizar tarefas autonomamente. Permite também expor através de páginas web a informação contida em qualquer repositório cuja informação seja descrita por ontologias. Solicita ao repositório os dados pretendidos para cada operação (Create, Read, Update, Delete (CRUD)), filtrando e transformando posteriormente os resultados. A plataforma organiza os conteúdos e expõe-nos de forma estruturada, facilitando assim a execução de operações de leitura, inserção, atualização e remoção destes. É utilizado um sistema de autenticação e autorização que permite apenas a utilizadores registados manipularem a informação contida no repositório (operações CRUD), enquanto que utilizadores não registados apenas têm permissão para visualizar informação. Recorre-se à existência de um administrador para realizar a manutenção do sistema e dos utilizadores registados neste.
+
+Das várias funcionalidades destacam-se:
+
+* Melhorias no processo de geração da interface de operações CRUD (Create, Read, Update,
+Delete);
+* Disponibilização de autenticação e autorização de acesso a páginas de dados;
+* Disponibilização do conteúdo do portal através de REST API (Representational State Transfer
+Application Programming Interface)
+
+Projeto desenvolvido em contexto de PESTI (Projeto/Estágio).
+
+### Versão ###
+
+* 6.0.2
 
 ### Requisitos ###
 
@@ -34,5 +47,5 @@ $route['register'] = 'user_controller/viewRegister';
 * Marta Graça [1100640@isep.ipp.pt](mailto:1100640@isep.ipp.pt)
 
 ### Orientadores ###
-* Nuno Silva
-* Paulo Maio
+* Nuno Silva [nps@isep.ipp.pt](mailto:nps@isep.ipp.pt)
+* Paulo Maio [pam@isep.ipp.pt](mailto:nps@isep.ipp.pt)
